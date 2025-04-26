@@ -1,2 +1,2 @@
 # Gym-Tracker
-My first React project for me
+My first React project 
