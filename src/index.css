@@ -1,0 +1,46 @@
+body{
+  font-family: Arial, Helvetica, sans-serif;
+}
+.header-sec{
+  background-color: hsl(223 32% 8%);
+  color:hsl(210 40% 98%);
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+.Name{
+  font-style:bold;
+}
+.Main-Components {
+  display: flex;
+  justify-content: space-evenly; 
+  align-items: center;
+  gap:1.5rem;
+}
+.Settings-icon{
+  cursor: pointer;
+}
+.Settings-icon{
+  display:flex;
+  align-items: center;
+  gap:3rem;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 4px;
+  cursor: pointer;
+}
+.Name{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 4px;
+  cursor: pointer;
+}
+.sign-in{
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
