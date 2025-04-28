@@ -1,17 +1,31 @@
-import Dashboard from './Header'
-import Title from './Title'
-import Body from './Body'
-import './App.css'
+import React from "react";
+import DashboardHeader from "./Header";
+import Initial from "./Welcome-initial";
+import StatsRow from "./StatsRow";
+import WorkoutActivity from "./WorkoutActivity";
+import QuickActions from "./QuickActions";
+import Title from "./Title";
+import RecentWorkouts from "./RecentWorkouts";
 
-function App() {
 
+function Dashboard() {
   return (
     <>
-      <Title />
-      <Dashboard />
-      <Body />
+    <Title></Title>
+      <DashboardHeader />
+      <div className="Body">
+        <div className="Initial-elems">
+          <Initial />
+        </div>
+        <StatsRow />
+        <div className="first-box-elems">
+          <WorkoutActivity />
+          <QuickActions />
+        </div>
+        <RecentWorkouts />
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default Dashboard;
