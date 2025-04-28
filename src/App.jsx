@@ -1,5 +1,6 @@
 import Dashboard from './Header'
 import Title from './Title'
+import Body from './Body'
 import './App.css'
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
     <>
       <Title />
       <Dashboard />
+      <Body />
     </>
   )
 }

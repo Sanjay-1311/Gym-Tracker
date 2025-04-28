@@ -1,6 +1,6 @@
 function Title(){
     return (
-        <title>My Gym Website</title>
+        <title>SculpTrack</title>
     )
 }
-export default Title
+export default Title;
