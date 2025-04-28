@@ -29,7 +29,7 @@ function Dashboard(){
             </div>
         </div>
         <div className="Settings-icon">
-            <Settings size={24} />
+            <Settings size={24} className='setting-logo'/>
             <div className='sign-in'>
                 <User size={24} />
                 <p>Sign In</p>
