@@ -7,13 +7,13 @@ function QuickActions() {
       <div className="quick-actions-title">Quick Actions</div>
       <div className="quick-actions-list">
         <button className="quick-action-button">
-          <Dumbbell size={18} /> Start New Workout
+          <Dumbbell size={16} /> Start Workout
         </button>
         <button className="quick-action-button">
-          <Calendar size={18} /> Schedule Workout
+          <Calendar size={16} /> Schedule
         </button>
         <button className="quick-action-button">
-          <Trophy size={18} /> View Progress
+          <Trophy size={16} /> Progress
         </button>
       </div>
     </div>
