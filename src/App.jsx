@@ -1,31 +1,18 @@
 import React from "react";
-import DashboardHeader from "./Header";
-import Initial from "./Welcome-initial";
-import StatsRow from "./StatsRow";
-import WorkoutActivity from "./WorkoutActivity";
-import QuickActions from "./QuickActions";
-import Title from "./Title";
-import RecentWorkouts from "./RecentWorkouts";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Dashboard from "./Dashboard";
+import SignIn from "./SignIn";
 
 
-function Dashboard() {
+function App() {
   return (
-    <>
-    <Title></Title>
-      <DashboardHeader />
-      <div className="Body">
-        <div className="Initial-elems">
-          <Initial />
-        </div>
-        <StatsRow />
-        <div className="first-box-elems">
-          <WorkoutActivity />
-          <QuickActions />
-        </div>
-        <RecentWorkouts />
-      </div>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/signin" element={<SignIn />} />
+      </Routes>
+    </Router>
   );
 }
 
-export default Dashboard;
+export default App;

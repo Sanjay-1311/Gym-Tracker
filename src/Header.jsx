@@ -1,5 +1,6 @@
 import React from "react";
 import { Settings, Dumbbell, ChartBar, Calendar, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function DashboardHeader() {
   return (
@@ -28,10 +29,10 @@ function DashboardHeader() {
       </div>
       <div className="Settings-icon">
         <Settings size={20} className="setting-logo" />
-        <div className="sign-in">
+        <Link to="/signin" className="sign-in">
           <User size={20} />
           <span>Sign In</span>
-        </div>
+        </Link>
       </div>
     </div>
   );
