@@ -14,6 +14,7 @@ function SignIn() {
 
   return (
     <div className="signin-container">
+      <title>Sign in</title>
       <div className="signin-card">
         <div className="signin-header">
           <h2>Sign in to your account</h2>
