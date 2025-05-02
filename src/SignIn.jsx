@@ -1,85 +1,107 @@
-import React, { useState } from 'react';
-import { User, Lock } from 'lucide-react';
-import './SignIn.css';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { LogIn, User, Github, Mail } from "lucide-react";
+import "./SignIn.css";
 
 function SignIn() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle sign in logic here
-    console.log('Sign in with:', { email, password });
+    console.log("Sign in attempted with:", formData);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   return (
-    <div className="signin-container">
-      <title>Sign in</title>
-      <div className="signin-card">
+
+    <div className="signin-page">
+      <title>Sculptrack</title>
+      <div className="signin-container">
         <div className="signin-header">
-          <h2>Sign in to your account</h2>
-          <p>
-            Or{' '}
-            <a href="#" className="signin-link">
-              create a new account
-            </a>
-          </p>
+          <h1>Welcome Back</h1>
+          <p>Sign in to continue to SculptTrack</p>
         </div>
-        <form className="signin-form" onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} className="signin-form">
           <div className="form-group">
-            <div className="input-group">
-              <div className="input-icon">
-                <User className="icon" />
-              </div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="input-group">
-              <div className="input-icon">
-                <Lock className="icon" />
-              </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="Enter your email"
+              autoComplete="email"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Enter your password"
+              autoComplete="current-password"
+            />
           </div>
 
-          <div className="form-options">
-            <div className="remember-me">
+          <div className="remember-forgot">
+            <label className="remember-me">
               <input
-                id="remember-me"
-                name="remember-me"
                 type="checkbox"
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
               />
-              <label htmlFor="remember-me">Remember me</label>
-            </div>
-
-            <div className="forgot-password">
-              <a href="#" className="signin-link">
-                Forgot your password?
-              </a>
-            </div>
+              Remember me
+            </label>
+            <Link to="/forgot-password" className="forgot-password">
+              Forgot password?
+            </Link>
           </div>
-
+          
           <button type="submit" className="signin-button">
-            Sign in
+            <LogIn size={20} />
+            Sign In
           </button>
         </form>
+
+        <div className="signin-divider">or continue with</div>
+
+        <div className="social-signin">
+          <button className="social-button">
+            <Github size={20} />
+            GitHub
+          </button>
+          <button className="social-button">
+            <Mail size={20} />
+            Google
+          </button>
+        </div>
+
+        <p className="signup-prompt">
+          Don't have an account?
+          <Link to="/signup" className="signup-link">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );
