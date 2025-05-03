@@ -1,16 +1,34 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import Dashboard from "./Dashboard";
-import SignIn from "./SignIn";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./frontend-main/Dashboard.jsx";
+import SignIn from "./Sign-in-auth/SignIn.jsx";
+import SignUp from "./Sign-in-auth/SignUp.jsx";
+import ForgotPassword from "./Sign-in-auth/ForgotPassword";
+import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
 
+function PrivateRoute({ children }) {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/signin" />;
+}
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/signin" element={<SignIn />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardHeader from "./Header";
+import Header from "./Header";
 import Initial from "./Welcome-initial";
 import StatsRow from "./StatsRow";
 import WorkoutActivity from "./WorkoutActivity";
@@ -11,7 +11,7 @@ function Dashboard() {
   return (
     <>
       <Title />
-      <DashboardHeader />
+      <Header />
       <div className="Body">
         <div className="Initial-elems">
           <Initial />
