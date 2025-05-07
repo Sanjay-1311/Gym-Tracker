@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Settings, Dumbbell, ChartBar, Calendar, User, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 function DashboardHeader() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState("");
 
   useEffect(() => {
@@ -33,10 +34,10 @@ function DashboardHeader() {
         <span>SculptTrack</span>
       </div>
       <div className="Main-Components">
-        <div className="nav-item">
+        <Link to="/" className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}>
           <ChartBar size={20} />
           Dashboard
-        </div>
+        </Link>
         <div className="nav-item">
           <Dumbbell size={20} />
           Workouts
@@ -45,10 +46,10 @@ function DashboardHeader() {
           <Calendar size={20} />
           Schedule
         </div>
-        <div className="nav-item">
+        <Link to="/profile" className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}>
           <User size={20} />
           Profile
-        </div>
+        </Link>
       </div>
       <div className="Settings-icon">
         <Settings size={20} className="setting-logo" />

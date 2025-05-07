@@ -4,6 +4,7 @@ import Dashboard from "./frontend-main/Dashboard.jsx";
 import SignIn from "./Sign-in-auth/SignIn.jsx";
 import SignUp from "./Sign-in-auth/SignUp.jsx";
 import ForgotPassword from "./Sign-in-auth/ForgotPassword";
+import Profile from "./frontend-main/Profile.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
 
 function PrivateRoute({ children }) {
@@ -24,6 +25,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
               </PrivateRoute>
             }
           />
