@@ -38,10 +38,10 @@ function DashboardHeader() {
           <ChartBar size={20} />
           Dashboard
         </Link>
-        <div className="nav-item">
+        <Link to="/workouts" className={`nav-item ${location.pathname === '/workouts' ? 'active' : ''}`}>
           <Dumbbell size={20} />
           Workouts
-        </div>
+        </Link>
         <div className="nav-item">
           <Calendar size={20} />
           Schedule
