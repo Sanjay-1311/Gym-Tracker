@@ -5,6 +5,7 @@ import SignIn from "./Sign-in-auth/SignIn.jsx";
 import SignUp from "./Sign-in-auth/SignUp.jsx";
 import ForgotPassword from "./Sign-in-auth/ForgotPassword";
 import Profile from "./frontend-main/Profile.jsx";
+import Workouts from "./frontend-main/Workouts.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
 
 function PrivateRoute({ children }) {
@@ -33,6 +34,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/workouts"
+            element={
+              <PrivateRoute>
+                <Workouts />
               </PrivateRoute>
             }
           />
