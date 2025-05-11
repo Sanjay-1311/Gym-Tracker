@@ -1,0 +1,150 @@
+.logging-page {
+  min-height: 100vh;
+  background: #f3f4f6;
+  padding: 2rem;
+}
+
+.logging-header {
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+}
+
+.back-button:hover {
+  color: #1997e6;
+}
+
+.logging-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+.workout-info {
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  gap: 1.5rem;
+  color: #64748b;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exercises-log {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.exercises-log h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.exercise-log-item {
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.exercise-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.sets-info {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.exercise-inputs {
+  display: flex;
+  gap: 1rem;
+}
+
+.input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.input-group input {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #1997e6;
+  box-shadow: 0 0 0 2px rgba(25, 151, 230, 0.1);
+}
+
+.logging-actions {
+  max-width: 800px;
+  margin: 2rem auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-log-btn {
+  background: #1997e6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.save-log-btn:hover {
+  background: #0ea5e9;
+}
+
+@media (max-width: 600px) {
+  .logging-page {
+    padding: 1rem;
+  }
+  
+  .exercise-inputs {
+    flex-direction: column;
+  }
+} 

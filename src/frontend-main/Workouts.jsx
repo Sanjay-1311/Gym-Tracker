@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar } from 'lucide-react';
+import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './Workouts.css';
 
 function Workouts() {
+  const navigate = useNavigate();
   const [workouts, setWorkouts] = useState([]);
   const [isAddingWorkout, setIsAddingWorkout] = useState(false);
   const [newWorkout, setNewWorkout] = useState({
@@ -13,9 +15,7 @@ function Workouts() {
   });
   const [newExercise, setNewExercise] = useState({
     name: '',
-    sets: '',
-    reps: '',
-    weight: ''
+    sets: ''
   });
 
   useEffect(() => {
@@ -50,16 +50,14 @@ function Workouts() {
   };
 
   const handleAddExercise = () => {
-    if (newExercise.name.trim() && newExercise.sets && newExercise.reps) {
+    if (newExercise.name.trim() && newExercise.sets) {
       setNewWorkout(prev => ({
         ...prev,
         exercises: [...prev.exercises, { ...newExercise, id: Date.now() }]
       }));
       setNewExercise({
         name: '',
-        sets: '',
-        reps: '',
-        weight: ''
+        sets: ''
       });
     }
   };
@@ -79,6 +77,10 @@ function Workouts() {
       return workout;
     });
     saveWorkouts(updatedWorkouts);
+  };
+
+  const handleStartWorkout = (workout) => {
+    navigate('/logging', { state: { workout } });
   };
 
   return (
@@ -128,18 +130,6 @@ function Workouts() {
                 value={newExercise.sets}
                 onChange={(e) => setNewExercise(prev => ({ ...prev, sets: e.target.value }))}
               />
-              <input
-                type="number"
-                placeholder="Reps"
-                value={newExercise.reps}
-                onChange={(e) => setNewExercise(prev => ({ ...prev, reps: e.target.value }))}
-              />
-              <input
-                type="number"
-                placeholder="Weight (kg)"
-                value={newExercise.weight}
-                onChange={(e) => setNewExercise(prev => ({ ...prev, weight: e.target.value }))}
-              />
               <button onClick={handleAddExercise}>Add Exercise</button>
             </div>
 
@@ -147,8 +137,7 @@ function Workouts() {
               {newWorkout.exercises.map((exercise, index) => (
                 <div key={exercise.id} className="exercise-item">
                   <span>{exercise.name}</span>
-                  <span>{exercise.sets} sets × {exercise.reps} reps</span>
-                  {exercise.weight && <span>{exercise.weight} kg</span>}
+                  <span>{exercise.sets} sets</span>
                 </div>
               ))}
             </div>
@@ -173,6 +162,9 @@ function Workouts() {
                 <button onClick={() => handleDeleteWorkout(workout.id)} className="delete-btn">
                   <Trash2 size={16} />
                 </button>
+                <button onClick={() => handleStartWorkout(workout)} className="start-btn">
+                  <Play size={16} />
+                </button>
               </div>
             </div>
             
@@ -193,8 +185,7 @@ function Workouts() {
               {workout.exercises.map(exercise => (
                 <div key={exercise.id} className="exercise-item">
                   <span>{exercise.name}</span>
-                  <span>{exercise.sets} sets × {exercise.reps} reps</span>
-                  {exercise.weight && <span>{exercise.weight} kg</span>}
+                  <span>{exercise.sets} sets</span>
                 </div>
               ))}
             </div>
