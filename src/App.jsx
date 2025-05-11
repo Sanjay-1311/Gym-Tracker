@@ -7,6 +7,7 @@ import ForgotPassword from "./Sign-in-auth/ForgotPassword";
 import Profile from "./frontend-main/Profile.jsx";
 import Workouts from "./frontend-main/Workouts.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
+import Logging from "./frontend-main/Logging.jsx";
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -45,6 +46,13 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/logging"
+            element={
+              <PrivateRoute>
+                <Logging />
+              </PrivateRoute>
+          } />
         </Routes>
       </AuthProvider>
     </Router>
