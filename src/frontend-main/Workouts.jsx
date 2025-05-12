@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play } from 'lucide-react';
+import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './Workouts.css';
 
@@ -7,6 +7,8 @@ function Workouts() {
   const navigate = useNavigate();
   const [workouts, setWorkouts] = useState([]);
   const [isAddingWorkout, setIsAddingWorkout] = useState(false);
+  const [isEditingWorkout, setIsEditingWorkout] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
   const [newWorkout, setNewWorkout] = useState({
     name: '',
     duration: '',
@@ -83,6 +85,47 @@ function Workouts() {
     navigate('/logging', { state: { workout } });
   };
 
+  const viewPreviousLogs = (workout) => {
+    navigate('/prev', { state: { workout } });
+  };
+
+  const handleEditWorkout = (workout) => {
+    setEditingWorkout(workout);
+    setNewWorkout({
+      name: workout.name,
+      duration: workout.duration,
+      exercises: workout.exercises,
+      lastCompleted: workout.lastCompleted
+    });
+    setIsEditingWorkout(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingWorkout && newWorkout.name.trim() && newWorkout.exercises.length > 0) {
+      const updatedWorkouts = workouts.map(workout => 
+        workout.id === editingWorkout.id 
+          ? { ...workout, ...newWorkout }
+          : workout
+      );
+      saveWorkouts(updatedWorkouts);
+      setIsEditingWorkout(false);
+      setEditingWorkout(null);
+      setNewWorkout({
+        name: '',
+        duration: '',
+        exercises: [],
+        lastCompleted: null
+      });
+    }
+  };
+
+  const handleDeleteExercise = (exerciseId) => {
+    setNewWorkout(prev => ({
+      ...prev,
+      exercises: prev.exercises.filter(ex => ex.id !== exerciseId)
+    }));
+  };
+
   return (
     <div className="workouts-page">
       <title>Add Workout</title>
@@ -97,9 +140,9 @@ function Workouts() {
         </button>
       </div>
 
-      {isAddingWorkout && (
+      {(isAddingWorkout || isEditingWorkout) && (
         <div className="add-workout-form">
-          <h2>Create New Workout</h2>
+          <h2>{isEditingWorkout ? 'Edit Workout' : 'Create New Workout'}</h2>
           <div className="form-group">
             <input
               type="text"
@@ -134,18 +177,46 @@ function Workouts() {
             </div>
 
             <div className="exercises-list">
-              {newWorkout.exercises.map((exercise, index) => (
+              {newWorkout.exercises.map((exercise) => (
                 <div key={exercise.id} className="exercise-item">
-                  <span>{exercise.name}</span>
-                  <span>{exercise.sets} sets</span>
+                  <div className="exercise-header">
+                    <span className="exercise-name">{exercise.name}</span>
+                    <span className="exercise-sets">{exercise.sets} sets</span>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteExercise(exercise.id)}
+                    className="delete-exercise-btn"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="form-actions">
-            <button onClick={handleAddWorkout} className="save-btn">Save Workout</button>
-            <button onClick={() => setIsAddingWorkout(false)} className="cancel-btn">Cancel</button>
+            <button 
+              onClick={isEditingWorkout ? handleSaveEdit : handleAddWorkout} 
+              className="save-btn"
+            >
+              {isEditingWorkout ? 'Save Changes' : 'Save Workout'}
+            </button>
+            <button 
+              onClick={() => {
+                setIsAddingWorkout(false);
+                setIsEditingWorkout(false);
+                setEditingWorkout(null);
+                setNewWorkout({
+                  name: '',
+                  duration: '',
+                  exercises: [],
+                  lastCompleted: null
+                });
+              }} 
+              className="cancel-btn"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
@@ -156,11 +227,17 @@ function Workouts() {
             <div className="workout-header">
               <h3>{workout.name}</h3>
               <div className="workout-actions">
+                <button onClick={() => handleEditWorkout(workout)} className="edit-btn">
+                  <Edit2 size={16} />
+                </button>
                 <button onClick={() => handleCompleteWorkout(workout.id)} className="complete-btn">
                   <Calendar size={16} />
                 </button>
                 <button onClick={() => handleDeleteWorkout(workout.id)} className="delete-btn">
                   <Trash2 size={16} />
+                </button>
+                <button onClick={() => viewPreviousLogs(workout)} className="logs-btn">
+                  <History size={16} />
                 </button>
                 <button onClick={() => handleStartWorkout(workout)} className="start-btn">
                   <Play size={16} />
@@ -184,8 +261,10 @@ function Workouts() {
             <div className="exercises-list">
               {workout.exercises.map(exercise => (
                 <div key={exercise.id} className="exercise-item">
-                  <span>{exercise.name}</span>
-                  <span>{exercise.sets} sets</span>
+                  <div className="exercise-header">
+                    <span className="exercise-name">{exercise.name}</span>
+                    <span className="exercise-sets">{exercise.sets} sets</span>
+                  </div>
                 </div>
               ))}
             </div>

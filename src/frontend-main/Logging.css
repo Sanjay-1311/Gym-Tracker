@@ -1,6 +1,6 @@
 .logging-page {
   min-height: 100vh;
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #eef2f7, #f8fafc);
   padding: 2rem;
 }
 
@@ -15,19 +15,21 @@
   gap: 0.5rem;
   background: none;
   border: none;
-  color: #64748b;
+  color: #3b82f6;
+  font-weight: 500;
   cursor: pointer;
   padding: 0.5rem 0;
   margin-bottom: 1rem;
+  transition: color 0.3s ease;
 }
 
 .back-button:hover {
-  color: #1997e6;
+  color: #2563eb;
 }
 
 .logging-header h1 {
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #1e293b;
 }
 
@@ -36,7 +38,12 @@
   margin: 0 auto 2rem auto;
   display: flex;
   gap: 1.5rem;
-  color: #64748b;
+  color: #475569;
+  background: #dbeafe;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .info-item {
@@ -51,21 +58,43 @@
   background: white;
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .exercises-log h2 {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.exercises-log h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 2px;
 }
 
 .exercise-log-item {
   padding: 1.5rem;
   border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   margin-bottom: 1rem;
+  background: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.exercise-log-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .exercise-header {
@@ -73,6 +102,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .exercise-header h3 {
@@ -81,14 +112,99 @@
   color: #1e293b;
 }
 
+.exercise-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.add-set-btn {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-set-btn:hover {
+  background: #dcfce7;
+  transform: scale(1.05);
+}
+
+.set-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.delete-set-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-set-btn:hover {
+  background: #fee2e2;
+  transform: scale(1.05);
+}
+
 .sets-info {
-  color: #64748b;
+  background: #e0f2fe;
+  color: #0c4a6e;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
   font-size: 0.9rem;
+}
+
+.sets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.set-inputs {
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.set-number {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.set-number::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
 }
 
 .exercise-inputs {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .input-group {
@@ -100,51 +216,108 @@
 
 .input-group label {
   font-size: 0.9rem;
-  color: #64748b;
+  color: #475569;
   font-weight: 500;
 }
 
 .input-group input {
   padding: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
   border-radius: 0.5rem;
   font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
 }
 
 .input-group input:focus {
   outline: none;
-  border-color: #1997e6;
-  box-shadow: 0 0 0 2px rgba(25, 151, 230, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-group input:hover {
+  border-color: #94a3b8;
 }
 
 .logging-actions {
   max-width: 800px;
   margin: 2rem auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .save-log-btn {
-  background: #1997e6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
 .save-log-btn:hover {
-  background: #0ea5e9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
-@media (max-width: 600px) {
+.save-log-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+@media (max-width: 768px) {
   .logging-page {
     padding: 1rem;
   }
-  
+
+  .exercises-log {
+    padding: 1.5rem;
+  }
+
   .exercise-inputs {
     flex-direction: column;
+    gap: 1rem;
+  }
+
+  .exercise-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .exercise-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .set-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .sets-info {
+    align-self: flex-start;
+  }
+
+  .set-inputs {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .workout-info {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .exercises-log h2 {
+    font-size: 1.3rem;
+  }
+
+  .exercise-log-item {
+    padding: 1rem;
   }
 } 

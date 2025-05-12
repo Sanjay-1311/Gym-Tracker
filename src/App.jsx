@@ -8,6 +8,7 @@ import Profile from "./frontend-main/Profile.jsx";
 import Workouts from "./frontend-main/Workouts.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
 import Logging from "./frontend-main/Logging.jsx";
+import PreviousLogs from "./frontend-main/PreviousLogs.jsx";
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -51,6 +52,13 @@ function App() {
             element={
               <PrivateRoute>
                 <Logging />
+              </PrivateRoute>
+          } />
+          <Route
+            path="/prev"
+            element={
+              <PrivateRoute>
+                <PreviousLogs />
               </PrivateRoute>
           } />
         </Routes>
