@@ -1,7 +1,8 @@
 import React from "react";
 import { Timer, Calendar, Dumbbell } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 function RecentWorkouts() {
+  const Navigate=useNavigate();
   return (
     <div className="recent-workouts-container">
       <div className="recent-workouts-header">
@@ -80,7 +81,8 @@ function RecentWorkouts() {
             </div>
             <h3 className="new-workout-title">Create New Workout</h3>
             <p className="new-workout-subtitle">Design your custom workout routine</p>
-            <button className="create-workout-btn">Create Workout</button>
+            
+            <button onClick={() => Navigate('/workouts')}className="create-workout-btn">Create Workout</button>
           </div>
         </div>
       </div>
