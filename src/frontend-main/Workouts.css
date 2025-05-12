@@ -391,6 +391,7 @@
     position: relative;
     z-index: 0;
     border-radius: 10px;
+    padding-left: 30px;
 }
 
 .glow-on-hover:before {
@@ -438,4 +439,12 @@
     0% { background-position: 0 0; }
     50% { background-position: 400% 0; }
     100% { background-position: 0 0; }
+}
+
+.btn {
+  line-height: 50px;
+  height: 50px;
+  text-align: center;
+  width: 250px;
+  cursor: pointer;
 }
