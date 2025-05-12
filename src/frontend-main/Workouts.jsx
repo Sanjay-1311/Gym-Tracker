@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from "lucide-react";
 import './Workouts.css';
 
 function Workouts() {
@@ -130,6 +131,9 @@ function Workouts() {
     <div className="workouts-page">
       <title>Add Workout</title>
       <div className="workouts-header">
+        <button className="glow-on-hover" onClick={() => navigate('/')}>
+          <ArrowLeft size={20}/>
+          </button>
         <h1>My Workouts</h1>
         <button 
           className="add-workout-btn"
