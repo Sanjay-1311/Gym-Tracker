@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from '../contexts/AuthContext';
+import { getWorkouts, createWorkout, updateWorkout, deleteWorkout } from '../services/api';
 import './Workouts.css';
 
 function Workouts() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [workouts, setWorkouts] = useState([]);
   const [isAddingWorkout, setIsAddingWorkout] = useState(false);
   const [isEditingWorkout, setIsEditingWorkout] = useState(false);
@@ -22,33 +25,41 @@ function Workouts() {
   });
 
   useEffect(() => {
-    // Load workouts from localStorage
-    const savedWorkouts = localStorage.getItem('workouts');
-    if (savedWorkouts) {
-      setWorkouts(JSON.parse(savedWorkouts));
-    }
-  }, []);
+    loadWorkouts();
+  }, [currentUser]);
 
-  const saveWorkouts = (updatedWorkouts) => {
-    localStorage.setItem('workouts', JSON.stringify(updatedWorkouts));
-    setWorkouts(updatedWorkouts);
+  const loadWorkouts = async () => {
+    try {
+      if (currentUser) {
+        const data = await getWorkouts(currentUser.uid);
+        setWorkouts(data);
+      }
+    } catch (error) {
+      console.error('Error loading workouts:', error);
+    }
   };
 
-  const handleAddWorkout = () => {
+  const handleAddWorkout = async () => {
     if (newWorkout.name.trim() && newWorkout.exercises.length > 0) {
-      const workoutToAdd = {
-        ...newWorkout,
-        id: Date.now(),
-        createdAt: new Date().toISOString()
-      };
-      saveWorkouts([...workouts, workoutToAdd]);
-      setNewWorkout({
-        name: '',
-        duration: '',
-        exercises: [],
-        lastCompleted: null
-      });
-      setIsAddingWorkout(false);
+      try {
+        const workoutData = {
+          userId: currentUser.uid,
+          name: newWorkout.name,
+          duration: newWorkout.duration,
+          exercises: newWorkout.exercises
+        };
+        await createWorkout(workoutData);
+        await loadWorkouts();
+        setNewWorkout({
+          name: '',
+          duration: '',
+          exercises: [],
+          lastCompleted: null
+        });
+        setIsAddingWorkout(false);
+      } catch (error) {
+        console.error('Error creating workout:', error);
+      }
     }
   };
 
@@ -65,21 +76,31 @@ function Workouts() {
     }
   };
 
-  const handleDeleteWorkout = (workoutId) => {
-    saveWorkouts(workouts.filter(workout => workout.id !== workoutId));
+  const handleDeleteWorkout = async (workoutId) => {
+    try {
+      await deleteWorkout(workoutId);
+      await loadWorkouts();
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+    }
   };
 
-  const handleCompleteWorkout = (workoutId) => {
-    const updatedWorkouts = workouts.map(workout => {
-      if (workout.id === workoutId) {
-        return {
-          ...workout,
-          lastCompleted: new Date().toISOString()
-        };
-      }
-      return workout;
-    });
-    saveWorkouts(updatedWorkouts);
+  const handleCompleteWorkout = async (workoutId) => {
+    try {
+      const updatedWorkouts = workouts.map(workout => {
+        if (workout.id === workoutId) {
+          return {
+            ...workout,
+            lastCompleted: new Date().toISOString()
+          };
+        }
+        return workout;
+      });
+      await updateWorkout(workoutId, { lastCompleted: new Date().toISOString() });
+      await loadWorkouts();
+    } catch (error) {
+      console.error('Error completing workout:', error);
+    }
   };
 
   const handleStartWorkout = (workout) => {
@@ -101,22 +122,26 @@ function Workouts() {
     setIsEditingWorkout(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingWorkout && newWorkout.name.trim() && newWorkout.exercises.length > 0) {
-      const updatedWorkouts = workouts.map(workout => 
-        workout.id === editingWorkout.id 
-          ? { ...workout, ...newWorkout }
-          : workout
-      );
-      saveWorkouts(updatedWorkouts);
-      setIsEditingWorkout(false);
-      setEditingWorkout(null);
-      setNewWorkout({
-        name: '',
-        duration: '',
-        exercises: [],
-        lastCompleted: null
-      });
+      try {
+        await updateWorkout(editingWorkout.id, {
+          name: newWorkout.name,
+          duration: newWorkout.duration,
+          exercises: newWorkout.exercises
+        });
+        await loadWorkouts();
+        setIsEditingWorkout(false);
+        setEditingWorkout(null);
+        setNewWorkout({
+          name: '',
+          duration: '',
+          exercises: [],
+          lastCompleted: null
+        });
+      } catch (error) {
+        console.error('Error updating workout:', error);
+      }
     }
   };
 
@@ -182,7 +207,7 @@ function Workouts() {
 
             <div className="exercises-list">
               {newWorkout.exercises.map((exercise) => (
-                <div key={exercise.id} className="exercise-item">
+                <div key={exercise._id || exercise.id} className="exercise-item">
                   <div className="exercise-header">
                     <span className="exercise-name">{exercise.name}</span>
                     <span className="exercise-sets">{exercise.sets} sets</span>
@@ -227,7 +252,7 @@ function Workouts() {
 
       <div className="workouts-grid">
         {workouts.map(workout => (
-          <div key={workout.id} className="workout-card">
+          <div key={workout._id} className="workout-card">
             <div className="workout-header">
               <h3>{workout.name}</h3>
               <div className="workout-actions">
@@ -264,7 +289,7 @@ function Workouts() {
 
             <div className="exercises-list">
               {workout.exercises.map(exercise => (
-                <div key={exercise.id} className="exercise-item">
+                <div key={exercise._id || exercise.id} className="exercise-item">
                   <div className="exercise-header">
                     <span className="exercise-name">{exercise.name}</span>
                     <span className="exercise-sets">{exercise.sets} sets</span>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { getWorkoutLogs, deleteWorkoutLog } from '../services/api';
 import './PreviousLogs.css';
 
 function PreviousLogs() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const workout = location.state?.workout;
   const [workoutLogs, setWorkoutLogs] = useState([]);
 
@@ -15,29 +18,28 @@ function PreviousLogs() {
       return;
     }
 
-    // Load workout logs from localStorage
-    const savedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
-    const logs = savedWorkouts.filter(log => log.id === workout.id);
-    setWorkoutLogs(logs);
-  }, [workout, navigate]);
+    loadWorkoutLogs();
+  }, [workout, navigate, currentUser]);
 
-  const handleDeleteLog = (logIndex) => {
-    // Get all completed workouts
-    const savedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
-    
-    // Find the log to delete
-    const logToDelete = workoutLogs[logIndex];
-    
-    // Remove the log from the array
-    const updatedWorkouts = savedWorkouts.filter(log => 
-      !(log.id === logToDelete.id && log.completedAt === logToDelete.completedAt)
-    );
-    
-    // Update localStorage
-    localStorage.setItem('completedWorkouts', JSON.stringify(updatedWorkouts));
-    
-    // Update state
-    setWorkoutLogs(workoutLogs.filter((_, index) => index !== logIndex));
+  const loadWorkoutLogs = async () => {
+    try {
+      if (currentUser) {
+        const logs = await getWorkoutLogs(currentUser.uid);
+        const filteredLogs = logs.filter(log => log.workout_id === workout.id);
+        setWorkoutLogs(filteredLogs);
+      }
+    } catch (error) {
+      console.error('Error loading workout logs:', error);
+    }
+  };
+
+  const handleDeleteLog = async (logId) => {
+    try {
+      await deleteWorkoutLog(logId);
+      await loadWorkoutLogs();
+    } catch (error) {
+      console.error('Error deleting workout log:', error);
+    }
   };
 
   if (!workout) return null;
@@ -67,16 +69,16 @@ function PreviousLogs() {
 
       <div className="logs-container">
         {workoutLogs.length > 0 ? (
-          workoutLogs.map((log, index) => (
-            <div key={index} className="log-card">
+          workoutLogs.map((log) => (
+            <div key={log._id || log.id} className="log-card">
               <div className="log-header">
-                <h3>{log.name}</h3>
+                <h3>{workout.name}</h3>
                 <div className="log-actions">
                   <span className="log-time">
                     {new Date(log.completedAt).toLocaleDateString()}
                   </span>
                   <button 
-                    onClick={() => handleDeleteLog(index)}
+                    onClick={() => handleDeleteLog(log.id)}
                     className="delete-log-btn"
                     title="Delete Log"
                   >
@@ -86,11 +88,11 @@ function PreviousLogs() {
               </div>
               <div className="exercises-list">
                 {log.exercises.map((exercise) => (
-                  <div key={exercise.id} className="exercise-item">
+                  <div key={exercise._id || exercise.id} className="exercise-item">
                     <div className="exercise-header">
                       <span className="exercise-name">{exercise.name}</span>
                       <span className="exercise-sets">
-                        {Array.isArray(exercise.sets) ? exercise.sets.length : 0} sets
+                        {exercise.sets.length} sets
                       </span>
                     </div>
                     <div className="sets-table">
@@ -99,21 +101,13 @@ function PreviousLogs() {
                         <span>Weight (kg)</span>
                         <span>Reps</span>
                       </div>
-                      {Array.isArray(exercise.sets) ? (
-                        exercise.sets.map((set, setIndex) => (
-                          <div key={setIndex} className="set-row">
-                            <span className="set-number">{setIndex + 1}</span>
-                            <span className="set-weight">{set.weight || '-'}</span>
-                            <span className="set-reps">{set.reps || '-'}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="set-row">
-                          <span className="set-number">-</span>
-                          <span className="set-weight">-</span>
-                          <span className="set-reps">-</span>
+                      {exercise.sets.map((set, setIndex) => (
+                        <div key={`${exercise._id || exercise.id}-${setIndex}`} className="set-row">
+                          <span className="set-number">{set.setNumber}</span>
+                          <span className="set-weight">{set.weight || '-'}</span>
+                          <span className="set-reps">{set.reps || '-'}</span>
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
                 ))}

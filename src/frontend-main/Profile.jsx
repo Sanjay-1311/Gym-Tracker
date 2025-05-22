@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getUserProfile, updateUserProfile } from '../services/api';
 import './Profile.css';
 
 function Profile() {
@@ -9,23 +10,38 @@ function Profile() {
   const [newUsername, setNewUsername] = useState('');
 
   useEffect(() => {
-    // Get username from localStorage
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-      setNewUsername(storedUsername);
+    loadUserProfile();
+  }, [currentUser]);
+
+  const loadUserProfile = async () => {
+    try {
+      if (currentUser) {
+        const profile = await getUserProfile(currentUser.uid);
+        setUsername(profile.username || '');
+        setNewUsername(profile.username || '');
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
     }
-  }, []);
+  };
 
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     if (newUsername.trim()) {
-      localStorage.setItem('username', newUsername.trim());
-      setUsername(newUsername.trim());
-      setIsEditing(false);
+      try {
+        await updateUserProfile({
+          id: currentUser.uid,
+          email: currentUser.email,
+          username: newUsername.trim()
+        });
+        setUsername(newUsername.trim());
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error updating username:', error);
+      }
     }
   };
 

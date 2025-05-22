@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Calendar, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { createWorkoutLog } from '../services/api';
 import './Logging.css';
 
 function Logging() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const workout = location.state?.workout;
   const [exerciseLogs, setExerciseLogs] = useState([]);
 
@@ -68,34 +71,28 @@ function Logging() {
     );
   };
 
-  const handleSaveLog = () => {
-    const completedWorkout = {
-      ...workout,
-      exercises: exerciseLogs.map(exercise => ({
-        ...exercise,
-        sets: exercise.sets.map((set, index) => ({
-          setNumber: index + 1,
-          reps: set.reps,
-          weight: set.weight
+  const handleSaveLog = async () => {
+    try {
+      const logData = {
+        userId: currentUser.uid,
+        workoutId: workout._id,
+        exercises: exerciseLogs.map(exercise => ({
+          exerciseId: exercise._id || exercise.id,
+          name: exercise.name,
+          sets: exercise.sets.map((set, index) => ({
+            exerciseId: exercise._id || exercise.id,
+            setNumber: index + 1,
+            reps: set.reps,
+            weight: set.weight
+          }))
         }))
-      })),
-      completedAt: new Date().toISOString()
-    };
-    
-    // Save to localStorage
-    const savedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
-    localStorage.setItem('completedWorkouts', JSON.stringify([...savedWorkouts, completedWorkout]));
-    
-    // Update the last completed date for this workout
-    const workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
-    const updatedWorkouts = workouts.map(w => 
-      w.id === workout.id 
-        ? { ...w, lastCompleted: new Date().toISOString() }
-        : w
-    );
-    localStorage.setItem('workouts', JSON.stringify(updatedWorkouts));
-    
-    navigate('/workouts');
+      };
+
+      await createWorkoutLog(logData);
+      navigate('/workouts');
+    } catch (error) {
+      console.error('Error saving workout log:', error);
+    }
   };
 
   if (!workout) return null;
@@ -126,7 +123,7 @@ function Logging() {
       <div className="exercises-log">
         <h2>Log Your Sets</h2>
         {exerciseLogs.map((exercise) => (
-          <div key={exercise.id} className="exercise-log-item">
+          <div key={exercise._id || exercise.id} className="exercise-log-item">
             <div className="exercise-header">
               <h3>{exercise.name}</h3>
               <div className="exercise-actions">
@@ -142,7 +139,7 @@ function Logging() {
             </div>
             <div className="sets-container">
               {exercise.sets.map((set, setIndex) => (
-                <div key={setIndex} className="set-inputs">
+                <div key={`${exercise._id || exercise.id}-${setIndex}`} className="set-inputs">
                   <div className="set-header">
                     <div className="set-number">Set {setIndex + 1}</div>
                     <button 
