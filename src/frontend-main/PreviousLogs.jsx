@@ -78,7 +78,7 @@ function PreviousLogs() {
                     {new Date(log.completedAt).toLocaleDateString()}
                   </span>
                   <button 
-                    onClick={() => handleDeleteLog(log.id)}
+                    onClick={() => handleDeleteLog(log._id)}
                     className="delete-log-btn"
                     title="Delete Log"
                   >

@@ -148,7 +148,7 @@ function Workouts() {
   const handleDeleteExercise = (exerciseId) => {
     setNewWorkout(prev => ({
       ...prev,
-      exercises: prev.exercises.filter(ex => ex.id !== exerciseId)
+      exercises: prev.exercises.filter(ex => (ex._id !== exerciseId) || (ex.id !== exerciseId))
     }));
   };
 
@@ -213,7 +213,7 @@ function Workouts() {
                     <span className="exercise-sets">{exercise.sets} sets</span>
                   </div>
                   <button 
-                    onClick={() => handleDeleteExercise(exercise.id)}
+                    onClick={() => handleDeleteExercise(exercise._id || exercise.id)}
                     className="delete-exercise-btn"
                   >
                     <Trash2 size={16} />
@@ -259,10 +259,10 @@ function Workouts() {
                 <button onClick={() => handleEditWorkout(workout)} className="edit-btn">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleCompleteWorkout(workout.id)} className="complete-btn">
+                <button onClick={() => handleCompleteWorkout(workout._id)} className="complete-btn">
                   <Calendar size={16} />
                 </button>
-                <button onClick={() => handleDeleteWorkout(workout.id)} className="delete-btn">
+                <button onClick={() => handleDeleteWorkout(workout._id)} className="delete-btn">
                   <Trash2 size={16} />
                 </button>
                 <button onClick={() => viewPreviousLogs(workout)} className="logs-btn">
