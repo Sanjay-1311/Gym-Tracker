@@ -25,8 +25,11 @@ function PreviousLogs() {
     try {
       if (currentUser) {
         const logs = await getWorkoutLogs(currentUser.uid);
-        const filteredLogs = logs.filter(log => log.workout_id === workout.id);
-        setWorkoutLogs(filteredLogs);
+        const filteredLogs = logs.filter(log => log.workoutId === workout._id);
+        const sortedLogs = filteredLogs.sort((a, b) => 
+          new Date(b.completedAt) - new Date(a.completedAt)
+        );
+        setWorkoutLogs(sortedLogs);
       }
     } catch (error) {
       console.error('Error loading workout logs:', error);
@@ -70,7 +73,7 @@ function PreviousLogs() {
       <div className="logs-container">
         {workoutLogs.length > 0 ? (
           workoutLogs.map((log) => (
-            <div key={log._id || log.id} className="log-card">
+            <div key={log._id} className="log-card">
               <div className="log-header">
                 <h3>{workout.name}</h3>
                 <div className="log-actions">

@@ -88,7 +88,7 @@ function Workouts() {
   const handleCompleteWorkout = async (workoutId) => {
     try {
       const updatedWorkouts = workouts.map(workout => {
-        if (workout.id === workoutId) {
+        if (workout._id === workoutId) {
           return {
             ...workout,
             lastCompleted: new Date().toISOString()

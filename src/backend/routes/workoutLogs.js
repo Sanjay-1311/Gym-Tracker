@@ -43,4 +43,32 @@ router.delete('/:logId', async (req, res) => {
   }
 });
 
+// Get monthly workout count for a user
+router.get('/monthly/:userId', async (req, res) => {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const endOfMonth = new Date();
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+    endOfMonth.setDate(0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    // Count all workout logs for the month
+    const count = await WorkoutLog.countDocuments({
+      userId: req.params.userId,
+      completedAt: {
+        $gte: startOfMonth,
+        $lte: endOfMonth
+      }
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error('Error fetching monthly workout count:', error);
+    res.status(500).json({ error: 'Failed to fetch monthly workout count' });
+  }
+});
+
 export default router; 

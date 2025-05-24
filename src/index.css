@@ -54,6 +54,7 @@ body {
   gap: 0.5rem;
   cursor: pointer;
   white-space: nowrap;
+  color: #ffffff;
 }
 
 .Settings-icon {
@@ -68,7 +69,7 @@ body {
   gap: 0.5rem;
   cursor: pointer;
   text-decoration: none;
-  color: inherit;
+  color: #ffffff;
 }
 
 /* Dashboard.css */
@@ -91,7 +92,14 @@ body {
   color: #1997e6;
 }
 
-.setting-logo:hover,
+.setting-logo {
+  color: #ffffff;
+}
+
+.setting-logo:hover {
+  color: #1997e6;
+}
+
 .sign-in:hover {
   color: #1997e6;
 }

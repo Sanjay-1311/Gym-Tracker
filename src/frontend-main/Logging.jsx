@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Calendar, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { createWorkoutLog } from '../services/api';
+import { createWorkoutLog, updateWorkout } from '../services/api';
 import './Logging.css';
 
 function Logging() {
@@ -89,6 +89,8 @@ function Logging() {
       };
 
       await createWorkoutLog(logData);
+      // Update the workout's lastCompleted field
+      await updateWorkout(workout._id, { lastCompleted: new Date().toISOString() });
       navigate('/workouts');
     } catch (error) {
       console.error('Error saving workout log:', error);

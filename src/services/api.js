@@ -75,4 +75,10 @@ export const deleteWorkoutLog = async (logId) => {
   });
   if (!response.ok) throw new Error('Failed to delete workout log');
   return response.json();
+};
+
+export const getMonthlyWorkoutCount = async (userId) => {
+  const response = await fetch(`${API_URL}/workout-logs/monthly/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch monthly workout count');
+  return response.json();
 }; 
