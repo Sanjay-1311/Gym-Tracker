@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Settings, Dumbbell, ChartBar, Calendar, User, LogOut } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { getUserProfile } from "../services/api";
 
 function DashboardHeader() {
   const { currentUser, logout } = useAuth();
@@ -10,17 +11,24 @@ function DashboardHeader() {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    // Get username from localStorage
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
+    const loadUserProfile = async () => {
+      if (currentUser) {
+        try {
+          const profile = await getUserProfile(currentUser.uid);
+          setUsername(profile.username || currentUser.email);
+        } catch (error) {
+          console.error("Failed to load user profile:", error);
+          setUsername(currentUser.email);
+        }
+      }
+    };
+
+    loadUserProfile();
   }, [currentUser]);
 
   const handleSignOut = async () => {
     try {
       await logout();
-      localStorage.removeItem('username');
       navigate("/signin");
     } catch (error) {
       console.error("Failed to sign out:", error);

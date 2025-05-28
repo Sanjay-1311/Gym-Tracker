@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserPlus, User, Github, Mail } from "lucide-react";
+import { getUserProfile, createUserProfile } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import "./SignIn.css";
 
@@ -26,9 +27,20 @@ function SignUp() {
     try {
       setError("");
       setLoading(true);
-      await signup(formData.email, formData.password);
-      // Store username in localStorage
-      localStorage.setItem('username', formData.username);
+      const result = await signup(formData.email, formData.password);
+      
+      // Create user profile in MongoDB
+      await createUserProfile({
+        id: result.user.uid,
+        email: formData.email,
+        username: formData.username,
+        createdAt: new Date().toISOString()
+      });
+      
+      // Verify the profile was created
+      const user = await getUserProfile(result.user.uid);
+      console.log("User profile created:", user);
+      
       navigate("/");
     } catch (error) {
       setError("Failed to create an account. " + error.message);
@@ -41,7 +53,22 @@ function SignUp() {
     try {
       setError("");
       setLoading(true);
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      
+      // Check if user profile exists in MongoDB
+      try {
+        await getUserProfile(result.user.uid);
+      } catch (error) {
+        // If profile doesn't exist, create one
+        const username = result.user.email.split('@')[0];
+        await createUserProfile({
+          id: result.user.uid,
+          email: result.user.email,
+          username: username,
+          createdAt: new Date().toISOString()
+        });
+      }
+      
       navigate("/");
     } catch (error) {
       setError("Failed to sign in with Google.");
@@ -54,7 +81,22 @@ function SignUp() {
     try {
       setError("");
       setLoading(true);
-      await signInWithGithub();
+      const result = await signInWithGithub();
+      
+      // Check if user profile exists in MongoDB
+      try {
+        await getUserProfile(result.user.uid);
+      } catch (error) {
+        // If profile doesn't exist, create one
+        const username = result.user.email.split('@')[0];
+        await createUserProfile({
+          id: result.user.uid,
+          email: result.user.email,
+          username: username,
+          createdAt: new Date().toISOString()
+        });
+      }
+      
       navigate("/");
     } catch (error) {
       setError("Failed to sign in with GitHub.");

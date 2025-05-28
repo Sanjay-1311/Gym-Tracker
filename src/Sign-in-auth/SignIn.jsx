@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getUserProfile, createUserProfile } from "../services/api";
 import { LogIn, User, Github, Mail } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import "./SignIn.css";
@@ -22,12 +23,18 @@ function SignIn() {
       setLoading(true);
       const result = await login(formData.email, formData.password);
       
-      // Check if username exists in localStorage
-      const storedUsername = localStorage.getItem('username');
-      if (!storedUsername) {
-        // If no username exists, extract it from email
+      // Check if user profile exists in MongoDB
+      try {
+        await getUserProfile(result.user.uid);
+      } catch (error) {
+        // If profile doesn't exist, create one
         const username = result.user.email.split('@')[0];
-        localStorage.setItem('username', username);
+        await createUserProfile({
+          id: result.user.uid,
+          email: result.user.email,
+          username: username,
+          createdAt: new Date().toISOString()
+        });
       }
       
       navigate("/");
@@ -44,12 +51,18 @@ function SignIn() {
       setLoading(true);
       const result = await signInWithGoogle();
       
-      // Check if username exists in localStorage
-      const storedUsername = localStorage.getItem('username');
-      if (!storedUsername) {
-        // If no username exists, extract it from email
+      // Check if user profile exists in MongoDB
+      try {
+        await getUserProfile(result.user.uid);
+      } catch (error) {
+        // If profile doesn't exist, create one
         const username = result.user.email.split('@')[0];
-        localStorage.setItem('username', username);
+        await createUserProfile({
+          id: result.user.uid,
+          email: result.user.email,
+          username: username,
+          createdAt: new Date().toISOString()
+        });
       }
       
       navigate("/");
@@ -66,12 +79,18 @@ function SignIn() {
       setLoading(true);
       const result = await signInWithGithub();
       
-      // Check if username exists in localStorage
-      const storedUsername = localStorage.getItem('username');
-      if (!storedUsername) {
-        // If no username exists, extract it from email
+      // Check if user profile exists in MongoDB
+      try {
+        await getUserProfile(result.user.uid);
+      } catch (error) {
+        // If profile doesn't exist, create one
         const username = result.user.email.split('@')[0];
-        localStorage.setItem('username', username);
+        await createUserProfile({
+          id: result.user.uid,
+          email: result.user.email,
+          username: username,
+          createdAt: new Date().toISOString()
+        });
       }
       
       navigate("/");

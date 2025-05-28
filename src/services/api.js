@@ -8,12 +8,37 @@ export const getUserProfile = async (userId) => {
 };
 
 export const updateUserProfile = async (userData) => {
+  const response = await fetch(`${API_URL}/users/${userData.id}`, {
+    method: 'PUT',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      email: userData.email,
+      username: userData.username
+    })
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update user profile');
+  }
+  return response.json();
+};
+
+export const createUserProfile = async (userData) => {
   const response = await fetch(`${API_URL}/users`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
     body: JSON.stringify(userData)
   });
-  if (!response.ok) throw new Error('Failed to update user profile');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create user profile');
+  }
   return response.json();
 };
 
