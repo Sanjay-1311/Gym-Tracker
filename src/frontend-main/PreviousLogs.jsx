@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, Trash2 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
-import { getWorkoutLogs, getAllWorkouts } from './services/api';
+import { getWorkoutLogs, getAllWorkouts, deleteWorkoutLog } from './services/api';
 import {
   Box,
   Button,
