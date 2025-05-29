@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { getSchedules, createSchedule, updateScheduleStatus, deleteSchedule, getWorkouts, getUserProfile } from '../services/api';
+import { useAuth } from './contexts/AuthContext';
+import { getSchedules, createSchedule, updateScheduleStatus, deleteSchedule, getWorkouts, getUserProfile } from './services/api';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dumbbell, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';

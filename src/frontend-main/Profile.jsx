@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { getUserProfile, updateUserProfile } from '../services/api';
+import { useAuth } from './contexts/AuthContext';
+import { getUserProfile, updateUserProfile } from './services/api';
 import { Box, Heading, Text, VStack, FormControl, FormLabel, Input, Button, Avatar, Flex, Spacer, useToast, HStack } from '@chakra-ui/react';
 
 function Profile() {

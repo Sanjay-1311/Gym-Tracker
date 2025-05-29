@@ -1,16 +1,16 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider, Routes, Route, Navigate } from "react-router-dom";
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
-import Dashboard from "./frontend-main/Dashboard.jsx";
+import Dashboard from "./Dashboard.jsx";
 import SignIn from "./Sign-in-auth/SignIn.jsx";
 import SignUp from "./Sign-in-auth/SignUp.jsx";
 import ForgotPassword from "./Sign-in-auth/ForgotPassword";
-import Profile from "./frontend-main/Profile.jsx";
-import Workouts from "./frontend-main/Workouts.jsx";
+import Profile from "./Profile.jsx";
+import Workouts from "./Workouts.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
-import Logging from "./frontend-main/Logging.jsx";
-import PreviousLogs from "./frontend-main/PreviousLogs.jsx";
-import Schedule from './frontend-main/Schedule';
+import Logging from "./Logging.jsx";
+import PreviousLogs from "./PreviousLogs.jsx";
+import Schedule from './Schedule';
 import theme from './theme';
 
 function PrivateRoute({ children }) {

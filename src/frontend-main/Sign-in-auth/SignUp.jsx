@@ -1,50 +1,62 @@
 import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { UserPlus, User, Github, Mail } from "lucide-react";
 import { getUserProfile, createUserProfile } from "../services/api";
-import { LogIn, User, Github, Mail } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { Box, Heading, Text, VStack, FormControl, FormLabel, Input, Button, Checkbox, Link, Divider, HStack, Icon, useToast, Flex } from '@chakra-ui/react';
+import { useAuth } from '../contexts/AuthContext';
+import { Box, Heading, Text, VStack, FormControl, FormLabel, Input, Button, Link, Divider, HStack, Icon, useToast, Flex } from '@chakra-ui/react';
 
-function SignIn() {
+function SignUp() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false
+    confirmPassword: "",
+    username: ""
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, signInWithGoogle, signInWithGithub } = useAuth();
+  const { signup, signInWithGoogle, signInWithGithub } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+       toast({
+        title: "Sign Up Failed",
+        description: "Passwords do not match.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       setError("");
       setLoading(true);
-      const result = await login(formData.email, formData.password);
+      const result = await signup(formData.email, formData.password);
       
-      // Check if user profile exists in MongoDB
-      try {
-        await getUserProfile(result.user.uid);
-      } catch (error) {
-        // If profile doesn't exist, create one
-        const username = result.user.email.split('@')[0];
-        await createUserProfile({
-          id: result.user.uid,
-          email: result.user.email,
-          username: username,
-          createdAt: new Date().toISOString()
-        });
-      }
+      // Create user profile in MongoDB
+      await createUserProfile({
+        id: result.user.uid,
+        email: formData.email,
+        username: formData.username,
+        createdAt: new Date().toISOString()
+      });
+      
+      // Verify the profile was created (Optional, but good for debugging)
+      // const user = await getUserProfile(result.user.uid);
+      // console.log("User profile created:", user);
       
       navigate("/");
     } catch (error) {
-      setError("Failed to sign in. Please check your credentials.");
+      setError("Failed to create an account. " + error.message);
       console.error(error);
       toast({
-        title: "Sign In Failed",
-        description: "Please check your credentials.",
+        title: "Sign Up Failed",
+        description: error.message,
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -78,8 +90,8 @@ function SignIn() {
       setError("Failed to sign in with Google.");
       console.error(error);
        toast({
-        title: "Google Sign In Failed",
-        description: "An error occurred during Google sign in.",
+        title: "Google Sign Up Failed",
+        description: "An error occurred during Google sign up.",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -113,8 +125,8 @@ function SignIn() {
       setError("Failed to sign in with GitHub.");
       console.error(error);
        toast({
-        title: "GitHub Sign In Failed",
-        description: "An error occurred during GitHub sign in.",
+        title: "GitHub Sign Up Failed",
+        description: "An error occurred during GitHub sign up.",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -124,10 +136,10 @@ function SignIn() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -137,8 +149,8 @@ function SignIn() {
       <Box borderWidth="1px" borderRadius="lg" p={8} maxWidth="md" width="100%" boxShadow="lg">
         <VStack spacing={6} align="stretch">
           <Box textAlign="center">
-            <Heading as="h1" size="xl">Welcome Back</Heading>
-            <Text fontSize="lg" color="gray.500">Sign in to continue to SculpTrack</Text>
+            <Heading as="h1" size="xl">Create Account</Heading>
+            <Text fontSize="lg" color="gray.500">Join SculpTrack to start your fitness journey</Text>
           </Box>
 
           {error && (
@@ -149,6 +161,19 @@ function SignIn() {
 
           <form onSubmit={handleSubmit}>
             <VStack spacing={4}>
+              <FormControl id="username">
+                <FormLabel>Username</FormLabel>
+                <Input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  placeholder="Choose a username"
+                  autoComplete="username"
+                />
+              </FormControl>
+
               <FormControl id="email">
                 <FormLabel>Email address</FormLabel>
                 <Input
@@ -170,32 +195,32 @@ function SignIn() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
+                  placeholder="Create a password"
+                  autoComplete="new-password"
                 />
               </FormControl>
 
-              <HStack justifyContent="space-between" width="100%">
-                <Checkbox
-                  name="rememberMe"
-                  isChecked={formData.rememberMe}
+              <FormControl id="confirmPassword">
+                <FormLabel>Confirm Password</FormLabel>
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
                   onChange={handleChange}
-                >
-                  Remember me
-                </Checkbox>
-                <Link as={RouterLink} to="/forgot-password" color="brand.500">
-                  Forgot password?
-                </Link>
-              </HStack>
+                  required
+                  placeholder="Confirm your password"
+                  autoComplete="new-password"
+                />
+              </FormControl>
               
               <Button
                 type="submit"
                 colorScheme="brand"
                 width="100%"
                 isLoading={loading}
-                leftIcon={<Icon as={LogIn} />}
+                leftIcon={<Icon as={UserPlus} />}
               >
-                Sign In
+                Sign Up
               </Button>
             </VStack>
           </form>
@@ -213,7 +238,7 @@ function SignIn() {
                 onClick={handleGithubSignIn}
                 disabled={loading}
               >
-                Sign in with GitHub
+                Sign up with GitHub
               </Button>
                <Button 
                 leftIcon={<Icon as={Mail} />} 
@@ -221,14 +246,14 @@ function SignIn() {
                 onClick={handleGoogleSignIn}
                 disabled={loading}
               >
-                Sign in with Google
+                Sign up with Google
               </Button>
           </VStack>
 
           <Text textAlign="center">
-            Don't have an account?{' '}
-            <Link as={RouterLink} to="/signup" color="brand.500" fontWeight="bold">
-              Sign up
+            Already have an account?{' '}
+            <Link as={RouterLink} to="/signin" color="brand.500" fontWeight="bold">
+              Sign in
             </Link>
           </Text>
         </VStack>
@@ -237,4 +262,4 @@ function SignIn() {
   );
 }
 
-export default SignIn; 
+export default SignUp; 

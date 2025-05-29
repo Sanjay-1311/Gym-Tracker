@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Dumbbell, ChartBar, Calendar, User, Settings, LogOut } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
 import MotivationalQuote from './MotivationalQuote';
-import ColorModeToggle from '../components/ColorModeToggle';
-import { getUserProfile } from '../services/api';
+import ColorModeToggle from './components/ColorModeToggle';
+import { getUserProfile } from './services/api';
 import {
   Box,
   Flex,

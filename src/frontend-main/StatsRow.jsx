@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Activity, Trophy, CalendarDays, ListChecks } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { getMonthlyWorkoutCount, getWeeklyWorkoutCount, getWorkoutStreak, getSchedules } from "../services/api";
+import { useAuth } from "./contexts/AuthContext";
+import { getMonthlyWorkoutCount, getWeeklyWorkoutCount, getWorkoutStreak, getSchedules } from "./services/api";
 import { format, isToday, isTomorrow, isThisWeek, addDays, isAfter } from 'date-fns';
 import { Box, Flex, Text, Stat, StatLabel, StatNumber, StatHelpText, Icon, Card, CardBody, SimpleGrid } from '@chakra-ui/react';
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Timer, Calendar, Dumbbell, Edit2, Play, History } from "lucide-react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { getWorkouts } from "../services/api";
+import { useAuth } from "./contexts/AuthContext";
+import { getWorkoutLogs, getAllWorkouts } from './services/api';
 import { Box, Heading, Text, Flex, Button, Card, CardBody, SimpleGrid, Icon, Spacer, useColorModeValue, VStack, HStack } from '@chakra-ui/react';
 
 function RecentWorkouts() {
@@ -19,7 +19,7 @@ function RecentWorkouts() {
     const fetchWorkouts = async () => {
       try {
         if (currentUser) {
-          const data = await getWorkouts(currentUser.uid);
+          const data = await getAllWorkouts(currentUser.uid);
          
           // Sort workouts by lastCompleted date, most recent first
           const sortedWorkouts = data.sort((a, b) => {

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from '../contexts/AuthContext';
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase/firebase.js";
-import "../Sign-in-auth/SignIn.css";
+import { auth } from '../firebase/firebase.js';
+import "./SignIn.css";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { getWorkoutLogs, getAllWorkouts } from '../services/api';
+import { useAuth } from './contexts/AuthContext';
+import { getWorkoutLogs, getAllWorkouts } from './services/api';
 import Modal from './Modal';
 import { Box, Text, Heading, Stat, StatLabel, StatNumber, VStack } from '@chakra-ui/react';
 

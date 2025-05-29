@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play, History } from 'lucide-react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from '../contexts/AuthContext';
-import { getWorkouts, createWorkout, updateWorkout, deleteWorkout } from '../services/api';
+import { useAuth } from './contexts/AuthContext';
+import { getWorkouts, createWorkout, updateWorkout, deleteWorkout } from './services/api';
 import { Box, Heading, Text, Flex, Button, VStack, HStack, Input, FormControl, FormLabel, IconButton, useToast, Card, CardBody, SimpleGrid, Icon, Spacer, useColorModeValue } from '@chakra-ui/react';
 
 function Workouts() {

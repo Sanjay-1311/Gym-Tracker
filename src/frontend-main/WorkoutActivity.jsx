@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { useAuth } from "../contexts/AuthContext";
-import { getDailyWorkoutCounts } from "../services/api";
+import { useAuth } from "./contexts/AuthContext";
+import { getDailyWorkoutCounts } from "./services/api";
 import { Box, Heading, Card, CardBody, useColorModeValue, useColorMode, useTheme } from '@chakra-ui/react';
 
 function WorkoutActivity() {
