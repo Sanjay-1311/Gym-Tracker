@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, startTransition } from 'react';
 import { auth } from '../firebase/firebase';
 import { 
   signInWithEmailAndPassword,
@@ -44,8 +44,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
+      startTransition(() => {
+        setCurrentUser(user);
+        setLoading(false);
+      });
     });
 
     return unsubscribe;

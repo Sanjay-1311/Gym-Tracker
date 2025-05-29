@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Routes, Route, Navigate } from "react-router-dom";
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import Dashboard from "./frontend-main/Dashboard.jsx";
 import SignIn from "./Sign-in-auth/SignIn.jsx";
@@ -18,67 +18,81 @@ function PrivateRoute({ children }) {
   return currentUser ? children : <Navigate to="/signin" />;
 }
 
+const router = createBrowserRouter([
+  {
+    path: "/signin",
+    element: <SignIn />,
+  },
+  {
+    path: "/signup",
+    element: <SignUp />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/",
+    element: (
+      <PrivateRoute>
+        <Dashboard />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <PrivateRoute>
+        <Profile />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/workouts",
+    element: (
+      <PrivateRoute>
+        <Workouts />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/logging",
+    element: (
+      <PrivateRoute>
+        <Logging />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/prev",
+    element: (
+      <PrivateRoute>
+        <PreviousLogs />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/schedule",
+    element: (
+      <PrivateRoute>
+        <Schedule />
+      </PrivateRoute>
+    ),
+  },
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  }
+});
+
 function App() {
   return (
     <ChakraProvider theme={theme}>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <Router>
-        <AuthProvider>
-          <Routes>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/workouts"
-              element={
-                <PrivateRoute>
-                  <Workouts />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/logging"
-              element={
-                <PrivateRoute>
-                  <Logging />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/prev"
-              element={
-                <PrivateRoute>
-                  <PreviousLogs />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/schedule"
-              element={
-                <PrivateRoute>
-                  <Schedule />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </AuthProvider>
-      </Router>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </ChakraProvider>
   );
 }
