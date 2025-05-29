@@ -1,97 +1,130 @@
 import React, { useState, useEffect } from "react";
 import { Activity, Trophy, CalendarDays, ListChecks } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { getMonthlyWorkoutCount,getWeeklyWorkoutCount,getWorkoutStreak } from "../services/api";
+import { getMonthlyWorkoutCount, getWeeklyWorkoutCount, getWorkoutStreak, getSchedules } from "../services/api";
+import { format, isToday, isTomorrow, isThisWeek, addDays, isAfter } from 'date-fns';
+import { Box, Flex, Text, Stat, StatLabel, StatNumber, StatHelpText, Icon, Card, CardBody, SimpleGrid } from '@chakra-ui/react';
 
 function StatsRow() {
   const { currentUser } = useAuth();
-  const [monthlyWorkouts, setMonthlyWorkouts] = useState(0);
-  const [weeklyWorkouts, setWeeklyWorkouts] = useState(0);
-  const [workoutStreak, setWorkoutStreak] = useState(0);
+  const [monthlyCount, setMonthlyCount] = useState(0);
+  const [weeklyCount, setWeeklyCount] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [nextWorkout, setNextWorkout] = useState(null);
+
   useEffect(() => {
-    const fetchMonthlyWorkouts = async () => {
+    const fetchStats = async () => {
       try {
-        if (currentUser) {
-          const data = await getMonthlyWorkoutCount(currentUser.uid);
-          setMonthlyWorkouts(data.count);
-        }
+        const [monthlyData, weeklyData, streakData, schedulesData] = await Promise.all([
+          getMonthlyWorkoutCount(currentUser.uid),
+          getWeeklyWorkoutCount(currentUser.uid),
+          getWorkoutStreak(currentUser.uid),
+          getSchedules(currentUser.uid)
+        ]);
+
+        setMonthlyCount(monthlyData.count);
+        setWeeklyCount(weeklyData.count);
+        setStreak(streakData.streak);
+
+        // Find the next scheduled workout
+        const now = new Date();
+        const upcomingWorkouts = schedulesData
+          .filter(schedule => new Date(schedule.scheduledDate) > now && schedule.status === 'scheduled')
+          .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+
+        setNextWorkout(upcomingWorkouts[0] || null);
       } catch (error) {
-        console.error('Error fetching monthly workouts:', error);
+        console.error('Error fetching stats:', error);
       }
     };
 
-    fetchMonthlyWorkouts();
-    // Set up an interval to refresh the count every 5 seconds
-    const intervalId = setInterval(fetchMonthlyWorkouts, 5000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
+    if (currentUser) {
+      fetchStats();
+    }
   }, [currentUser]);
-  useEffect(() => {
-    const fetchWeeklyWorkouts = async () => {
-      try {
-        if (currentUser) {
-          const data = await getWeeklyWorkoutCount(currentUser.uid);
-          setWeeklyWorkouts(data.count);
-        }
-      } catch (error) {
-        console.error('Error fetching weekly workouts:', error);
-      }
-    };
 
-    fetchWeeklyWorkouts();
-    // Set up an interval to refresh the count every 5 seconds
-    const intervalId = setInterval(fetchWeeklyWorkouts, 5000);
+  const formatNextWorkoutDate = (date) => {
+    const workoutDate = new Date(date);
+    const today = new Date();
+    const nextWeek = addDays(today, 7);
 
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [currentUser]);
-  // Fetch workout streak
-  useEffect(() => {
-    const fetchWorkoutStreak = async () => {
-      try {
-        if (currentUser) {
-          const data = await getWorkoutStreak(currentUser.uid);
-          // Assuming the API returns a streak count
-          setWorkoutStreak(data.streak);
-        }
-      } catch (error) {
-        console.error('Error fetching workout streak:', error);
-      }
-    };
+    if (isToday(workoutDate)) {
+      return 'Today';
+    } else if (isTomorrow(workoutDate)) {
+      return 'Tomorrow';
+    } else if (isThisWeek(workoutDate)) {
+      return format(workoutDate, 'EEEE');
+    } else if (isAfter(workoutDate, today) && isAfter(nextWeek, workoutDate)) {
+      return `Next ${format(workoutDate, 'EEEE')}`;
+    } else {
+      return format(workoutDate, 'MMM d');
+    }
+  };
 
-    fetchWorkoutStreak();
-    // Set up an interval to refresh the streak every 5 seconds
-    const intervalId = setInterval(fetchWorkoutStreak, 5000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [currentUser]);
   return (
-    <div className="stats-row">
-      <div className="stat-card">
-        <span className="stat-title">Total Workouts</span>
-        <span className="stat-value">{monthlyWorkouts}</span>
-        <span className="stat-trend">This month</span>
-        <span className="stat-icon"><Activity size={20} /></span>
-      </div>
-      <div className="stat-card">
-        <span className="stat-value">{weeklyWorkouts}</span>
-        <span className="stat-sub">Workouts this week</span>
-        <span className="stat-icon"><Trophy size={20} /></span>
-      </div>
-      <div className="stat-card">
-        <span className="stat-title">Workout Streak</span>
-        <span className="stat-value">{workoutStreak} days</span>
-        <span className="stat-icon"><CalendarDays size={20} /></span>
-      </div>
-      <div className="stat-card">
-        <span className="stat-title">Personal Records</span>
-        <span className="stat-value">8</span>
-        <span className="stat-trend">↑ 3% This month</span>
-        <span className="stat-icon"><ListChecks size={20} /></span>
-      </div>
-    </div>
+    <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={6}>
+      <Card>
+        <CardBody>
+          <Stat>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Box>
+                <StatLabel>Total Workouts</StatLabel>
+                <StatNumber>{monthlyCount}</StatNumber>
+                <StatHelpText>This month</StatHelpText>
+              </Box>
+              <Icon as={Activity} boxSize={6} color="brand.500" />
+            </Flex>
+          </Stat>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardBody>
+          <Stat>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Box>
+                <StatLabel>Workouts this week</StatLabel>
+                <StatNumber>{weeklyCount}</StatNumber>
+              </Box>
+              <Icon as={Trophy} boxSize={6} color="brand.500" />
+            </Flex>
+          </Stat>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardBody>
+          <Stat>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Box>
+                <StatLabel>Workout Streak</StatLabel>
+                <StatNumber>{streak} days</StatNumber>
+              </Box>
+              <Icon as={CalendarDays} boxSize={6} color="brand.500" />
+            </Flex>
+          </Stat>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardBody>
+          <Stat>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Box>
+                <StatLabel>Next Workout</StatLabel>
+                <StatNumber fontSize="lg">
+                  {nextWorkout ? nextWorkout.workoutName : 'None'}
+                </StatNumber>
+                <StatHelpText>
+                  {nextWorkout ? formatNextWorkoutDate(nextWorkout.scheduledDate) : 'No workouts scheduled'}
+                </StatHelpText>
+              </Box>
+              <Icon as={ListChecks} boxSize={6} color="brand.500" />
+            </Flex>
+          </Stat>
+        </CardBody>
+      </Card>
+    </SimpleGrid>
   );
 }
 

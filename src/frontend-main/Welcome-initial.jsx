@@ -1,13 +1,14 @@
-import React from "react";
+import React from 'react';
+import { Heading, Text, Box } from '@chakra-ui/react';
 
 function Initial() {
   return (
-    <>
-      <div className="Welcome-msg">Welcome back!</div>
-      <div className="Welcome-sub">
+    <Box>
+      <Heading as="h2" size="xl" mb={2}>Welcome back!</Heading>
+      <Text fontSize="lg">
         Track, analyze and improve your fitness journey.
-      </div>
-    </>
+      </Text>
+    </Box>
   );
 }
 

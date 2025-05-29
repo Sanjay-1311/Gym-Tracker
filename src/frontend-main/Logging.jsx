@@ -3,7 +3,24 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Calendar, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { createWorkoutLog, updateWorkout } from '../services/api';
-import './Logging.css';
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  IconButton,
+  Input,
+  FormControl,
+  FormLabel,
+  VStack,
+  HStack,
+  Icon,
+  Card,
+  CardBody,
+  useColorModeValue,
+  Text,
+} from '@chakra-ui/react';
 
 function Logging() {
   const location = useLocation();
@@ -11,6 +28,14 @@ function Logging() {
   const { currentUser } = useAuth();
   const workout = location.state?.workout;
   const [exerciseLogs, setExerciseLogs] = useState([]);
+
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const cardBg = useColorModeValue('gray.50', 'gray.700');
+  const inputBg = useColorModeValue('white', 'gray.800');
+  const inputBorderColor = useColorModeValue('gray.300', 'gray.600');
 
   useEffect(() => {
     if (!workout) {
@@ -100,94 +125,104 @@ function Logging() {
   if (!workout) return null;
 
   return (
-    <div className="logging-page">
-      <div className="logging-header">
-        <button onClick={() => navigate('/workouts')} className="back-button">
-          <ArrowLeft size={20} />
-          Back to Workouts
-        </button>
-        <h1>{workout.name}</h1>
-      </div>
+    <Container maxW="container.md" py={8}>
+      <VStack spacing={6} align="stretch">
+        <Flex justifyContent="space-between" alignItems="center">
+          <Button onClick={() => navigate('/workouts')} variant="link" colorScheme="gray" leftIcon={<Icon as={ArrowLeft} />}>
+            Back to Workouts
+          </Button>
+          <Heading as="h1" size="xl" color={textColor}>{workout.name}</Heading>
+        </Flex>
 
-      <div className="workout-info">
-        <div className="info-item">
-          <Clock size={16} />
-          <span>{workout.duration}</span>
-        </div>
-        {workout.lastCompleted && (
-          <div className="info-item">
-            <Calendar size={16} />
-            <span>Last: {new Date(workout.lastCompleted).toLocaleDateString()}</span>
-          </div>
-        )}
-      </div>
+        <HStack spacing={4} color={mutedTextColor}>
+          <Flex alignItems="center">
+            <Icon as={Clock} mr={1} />
+            <Text>{workout.duration}</Text>
+          </Flex>
+          {workout.lastCompleted && (
+            <Flex alignItems="center">
+              <Icon as={Calendar} mr={1} />
+              <Text>Last: {new Date(workout.lastCompleted).toLocaleDateString()}</Text>
+            </Flex>
+          )}
+        </HStack>
 
-      <div className="exercises-log">
-        <h2>Log Your Sets</h2>
-        {exerciseLogs.map((exercise) => (
-          <div key={exercise._id || exercise.id} className="exercise-log-item">
-            <div className="exercise-header">
-              <h3>{exercise.name}</h3>
-              <div className="exercise-actions">
-                <span className="sets-info">{exercise.sets.length} sets</span>
-                <button 
-                  onClick={() => handleAddSet(exercise.id)}
-                  className="add-set-btn"
-                  title="Add Set"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-            </div>
-            <div className="sets-container">
-              {exercise.sets.map((set, setIndex) => (
-                <div key={`${exercise._id || exercise.id}-${setIndex}`} className="set-inputs">
-                  <div className="set-header">
-                    <div className="set-number">Set {setIndex + 1}</div>
-                    <button 
-                      onClick={() => handleDeleteSet(exercise.id, setIndex)}
-                      className="delete-set-btn"
-                      title="Delete Set"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <div className="exercise-inputs">
-                    <div className="input-group">
-                      <label>Reps</label>
-                      <input
-                        type="number"
-                        value={set.reps}
-                        onChange={(e) => handleInputChange(exercise.id, setIndex, 'reps', e.target.value)}
-                        placeholder="Enter reps"
-                        min="0"
-                      />
-                    </div>
-                    <div className="input-group">
-                      <label>Weight (kg)</label>
-                      <input
-                        type="number"
-                        value={set.weight}
-                        onChange={(e) => handleInputChange(exercise.id, setIndex, 'weight', e.target.value)}
-                        placeholder="Enter weight"
-                        min="0"
-                        step="0.5"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+        <Box>
+          <Heading as="h2" size="lg" mb={4} color={textColor}>Log Your Sets</Heading>
+          <VStack spacing={4} align="stretch">
+            {exerciseLogs.map((exercise) => (
+              <Card key={exercise._id || exercise.id} bg={cardBg} borderColor={borderColor} borderWidth="1px">
+                <CardBody>
+                  <VStack spacing={4} align="stretch">
+                    <Flex justifyContent="space-between" alignItems="center">
+                      <Heading as="h3" size="md" color={textColor}>{exercise.name}</Heading>
+                      <HStack spacing={2}>
+                        <Text fontSize="sm" color={mutedTextColor}>{exercise.sets.length} sets</Text>
+                        <IconButton 
+                          icon={<Icon as={Plus} size={16} />}
+                          onClick={() => handleAddSet(exercise.id)}
+                          size="sm"
+                          colorScheme="green"
+                          aria-label="Add Set"
+                        />
+                      </HStack>
+                    </Flex>
+                    <VStack spacing={4} align="stretch">
+                      {exercise.sets.map((set, setIndex) => (
+                        <Box key={`${exercise._id || exercise.id}-${setIndex}`} p={3} borderWidth="1px" borderColor={borderColor} borderRadius="md" bg={bgColor}>
+                          <Flex justifyContent="space-between" alignItems="center" mb={3}>
+                            <Text fontWeight="bold" color={textColor}>Set {setIndex + 1}</Text>
+                            <IconButton 
+                              icon={<Icon as={Trash2} size={16} />}
+                              onClick={() => handleDeleteSet(exercise.id, setIndex)}
+                              size="sm"
+                              colorScheme="red"
+                              variant="ghost"
+                              aria-label="Delete Set"
+                            />
+                          </Flex>
+                          <HStack spacing={4}>
+                            <FormControl flex="1">
+                              <FormLabel fontSize="sm" color={mutedTextColor}>Reps</FormLabel>
+                              <Input
+                                type="number"
+                                value={set.reps}
+                                onChange={(e) => handleInputChange(exercise.id, setIndex, 'reps', e.target.value)}
+                                placeholder="Enter reps"
+                                min="0"
+                                bg={inputBg}
+                                borderColor={inputBorderColor}
+                              />
+                            </FormControl>
+                            <FormControl flex="1">
+                              <FormLabel fontSize="sm" color={mutedTextColor}>Weight (kg)</FormLabel>
+                              <Input
+                                type="number"
+                                value={set.weight}
+                                onChange={(e) => handleInputChange(exercise.id, setIndex, 'weight', e.target.value)}
+                                placeholder="Enter weight"
+                                min="0"
+                                step="0.5"
+                                bg={inputBg}
+                                borderColor={inputBorderColor}
+                              />
+                            </FormControl>
+                          </HStack>
+                        </Box>
+                      ))}
+                    </VStack>
+                  </VStack>
+                </CardBody>
+              </Card>
+            ))}
+          </VStack>
+        </Box>
 
-      <div className="logging-actions">
-        <button onClick={handleSaveLog} className="save-log-btn">
+        <Button onClick={handleSaveLog} colorScheme="brand" size="lg" alignSelf="flex-end">
           Save Workout Log
-        </button>
-      </div>
-    </div>
+        </Button>
+      </VStack>
+    </Container>
   );
 }
 

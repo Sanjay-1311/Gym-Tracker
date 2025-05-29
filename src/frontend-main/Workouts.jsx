@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, Plus, Trash2, Edit2, Clock, Calendar, Play, History } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from '../contexts/AuthContext';
 import { getWorkouts, createWorkout, updateWorkout, deleteWorkout } from '../services/api';
-import './Workouts.css';
+import { Box, Heading, Text, Flex, Button, VStack, HStack, Input, FormControl, FormLabel, IconButton, useToast, Card, CardBody, SimpleGrid, Icon, Spacer, useColorModeValue } from '@chakra-ui/react';
 
 function Workouts() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const toast = useToast();
   const [workouts, setWorkouts] = useState([]);
   const [isAddingWorkout, setIsAddingWorkout] = useState(false);
   const [isEditingWorkout, setIsEditingWorkout] = useState(false);
@@ -24,6 +25,13 @@ function Workouts() {
     sets: ''
   });
 
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const inputBg = useColorModeValue('white', 'gray.800');
+  const inputBorderColor = useColorModeValue('gray.200', 'gray.600');
+  const exerciseItemBorderColor = useColorModeValue('gray.200', 'gray.700');
+
   useEffect(() => {
     loadWorkouts();
   }, [currentUser]);
@@ -36,6 +44,13 @@ function Workouts() {
       }
     } catch (error) {
       console.error('Error loading workouts:', error);
+      toast({
+        title: 'Error loading workouts.',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -50,6 +65,12 @@ function Workouts() {
         };
         await createWorkout(workoutData);
         await loadWorkouts();
+        toast({
+          title: 'Workout created.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
         setNewWorkout({
           name: '',
           duration: '',
@@ -59,6 +80,13 @@ function Workouts() {
         setIsAddingWorkout(false);
       } catch (error) {
         console.error('Error creating workout:', error);
+        toast({
+          title: 'Error creating workout.',
+          description: error.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
       }
     }
   };
@@ -80,8 +108,21 @@ function Workouts() {
     try {
       await deleteWorkout(workoutId);
       await loadWorkouts();
+      toast({
+        title: 'Workout deleted.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error('Error deleting workout:', error);
+      toast({
+        title: 'Error deleting workout.',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -98,8 +139,21 @@ function Workouts() {
       });
       await updateWorkout(workoutId, { lastCompleted: new Date().toISOString() });
       await loadWorkouts();
+       toast({
+        title: 'Workout marked as completed.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error('Error completing workout:', error);
+       toast({
+        title: 'Error completing workout.',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -125,12 +179,18 @@ function Workouts() {
   const handleSaveEdit = async () => {
     if (editingWorkout && newWorkout.name.trim() && newWorkout.exercises.length > 0) {
       try {
-        await updateWorkout(editingWorkout.id, {
+        await updateWorkout(editingWorkout._id, {
           name: newWorkout.name,
           duration: newWorkout.duration,
           exercises: newWorkout.exercises
         });
         await loadWorkouts();
+         toast({
+          title: 'Workout updated.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
         setIsEditingWorkout(false);
         setEditingWorkout(null);
         setNewWorkout({
@@ -141,6 +201,13 @@ function Workouts() {
         });
       } catch (error) {
         console.error('Error updating workout:', error);
+         toast({
+          title: 'Error updating workout.',
+          description: error.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
       }
     }
   };
@@ -148,89 +215,116 @@ function Workouts() {
   const handleDeleteExercise = (exerciseId) => {
     setNewWorkout(prev => ({
       ...prev,
-      exercises: prev.exercises.filter(ex => (ex._id !== exerciseId) || (ex.id !== exerciseId))
+      exercises: prev.exercises.filter(ex => (ex._id !== exerciseId) && (ex.id !== exerciseId))
     }));
   };
 
   return (
-    <div className="workouts-page">
-      <title>Add Workout</title>
-      <div className="workouts-header">
-        <button className="glow-on-hover" onClick={() => navigate('/')}>
-          <ArrowLeft size={20}/>
-          </button>
-        <h1>My Workouts</h1>
-        <button 
-          className="add-workout-btn"
+    <Box p={6}>
+      <title>SculpTrack - Workouts</title>
+      <Flex justifyContent="space-between" alignItems="center" mb={6}>
+        <HStack spacing={4} alignItems="center">
+           <IconButton
+            as={RouterLink}
+            to="/"
+            icon={<ArrowLeft size={20} />}
+            aria-label="Back to Dashboard"
+            variant="ghost"
+          />
+          <Heading as="h1" size="xl">My Workouts</Heading>
+        </HStack>
+        <Button
+          leftIcon={<Plus size={20} />}
+          colorScheme="brand"
           onClick={() => setIsAddingWorkout(true)}
         >
-          <Plus size={20} />
           Add Workout
-        </button>
-      </div>
+        </Button>
+      </Flex>
 
       {(isAddingWorkout || isEditingWorkout) && (
-        <div className="add-workout-form">
-          <h2>{isEditingWorkout ? 'Edit Workout' : 'Create New Workout'}</h2>
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Workout Name"
-              value={newWorkout.name}
-              onChange={(e) => setNewWorkout(prev => ({ ...prev, name: e.target.value }))}
-            />
-            <input
-              type="text"
-              placeholder="Duration (e.g., 45 min)"
-              value={newWorkout.duration}
-              onChange={(e) => setNewWorkout(prev => ({ ...prev, duration: e.target.value }))}
-            />
-          </div>
-
-          <div className="exercises-section">
-            <h3>Exercises</h3>
-            <div className="exercise-form">
-              <input
+        <Box mb={6} p={6} borderWidth="1px" borderRadius="lg" bg={cardBg} borderColor={cardBorderColor}>
+          <Heading as="h2" size="lg" mb={4}>{isEditingWorkout ? 'Edit Workout' : 'Create New Workout'}</Heading>
+          <VStack spacing={4} align="stretch" mb={6}>
+            <FormControl>
+              <FormLabel>Workout Name</FormLabel>
+              <Input
                 type="text"
-                placeholder="Exercise Name"
-                value={newExercise.name}
-                onChange={(e) => setNewExercise(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter workout name"
+                value={newWorkout.name}
+                onChange={(e) => setNewWorkout(prev => ({ ...prev, name: e.target.value }))}
+                bg={inputBg}
+                borderColor={inputBorderColor}
+                color={textColor}
               />
-              <input
-                type="number"
-                placeholder="Sets"
-                value={newExercise.sets}
-                onChange={(e) => setNewExercise(prev => ({ ...prev, sets: e.target.value }))}
+            </FormControl>
+            <FormControl>
+              <FormLabel>Duration (optional)</FormLabel>
+              <Input
+                type="text"
+                placeholder="e.g., 45 min"
+                value={newWorkout.duration}
+                onChange={(e) => setNewWorkout(prev => ({ ...prev, duration: e.target.value }))}
+                 bg={inputBg}
+                borderColor={inputBorderColor}
+                color={textColor}
               />
-              <button onClick={handleAddExercise}>Add Exercise</button>
-            </div>
+            </FormControl>
+          </VStack>
 
-            <div className="exercises-list">
+          <Box mb={6}>
+            <Heading as="h3" size="md" mb={3}>Exercises</Heading>
+            <VStack spacing={3} align="stretch" mb={4}>
               {newWorkout.exercises.map((exercise) => (
-                <div key={exercise._id || exercise.id} className="exercise-item">
-                  <div className="exercise-header">
-                    <span className="exercise-name">{exercise.name}</span>
-                    <span className="exercise-sets">{exercise.sets} sets</span>
-                  </div>
-                  <button 
+                <Flex key={exercise._id || exercise.id} justifyContent="space-between" alignItems="center" p={3} borderWidth="1px" borderRadius="md" borderColor={exerciseItemBorderColor} bg={useColorModeValue('gray.50', 'gray.600')}>
+                  <Box>
+                    <Text fontWeight="bold">{exercise.name}</Text>
+                    <Text fontSize="sm" color="gray.500">{exercise.sets} sets</Text>
+                  </Box>
+                  <IconButton
+                    icon={<Trash2 size={16} />}
+                    aria-label="Delete exercise"
+                    size="sm"
+                    variant="ghost"
+                    colorScheme="red"
                     onClick={() => handleDeleteExercise(exercise._id || exercise.id)}
-                    className="delete-exercise-btn"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                  />
+                </Flex>
               ))}
-            </div>
-          </div>
+            </VStack>
 
-          <div className="form-actions">
-            <button 
-              onClick={isEditingWorkout ? handleSaveEdit : handleAddWorkout} 
-              className="save-btn"
-            >
-              {isEditingWorkout ? 'Save Changes' : 'Save Workout'}
-            </button>
-            <button 
+            <HStack spacing={3}>
+              <FormControl flex="1">
+                 <FormLabel>Exercise Name</FormLabel>
+                <Input
+                  type="text"
+                  placeholder="Enter exercise name"
+                  value={newExercise.name}
+                  onChange={(e) => setNewExercise(prev => ({ ...prev, name: e.target.value }))}
+                   bg={inputBg}
+                borderColor={inputBorderColor}
+                color={textColor}
+                />
+              </FormControl>
+              <FormControl w="100px">
+                <FormLabel>Sets</FormLabel>
+                <Input
+                  type="number"
+                  placeholder="Sets"
+                  value={newExercise.sets}
+                  onChange={(e) => setNewExercise(prev => ({ ...prev, sets: e.target.value }))}
+                   bg={inputBg}
+                borderColor={inputBorderColor}
+                color={textColor}
+                />
+              </FormControl>
+              <Button onClick={handleAddExercise} colorScheme="brand" mt={8}>Add Exercise</Button>
+            </HStack>
+          </Box>
+
+          <HStack spacing={4} justifyContent="flex-end">
+            <Button
+              variant="outline"
               onClick={() => {
                 setIsAddingWorkout(false);
                 setIsEditingWorkout(false);
@@ -241,66 +335,61 @@ function Workouts() {
                   exercises: [],
                   lastCompleted: null
                 });
-              }} 
-              className="cancel-btn"
+              }}
             >
               Cancel
-            </button>
-          </div>
-        </div>
+            </Button>
+            <Button
+              colorScheme="brand"
+              onClick={isEditingWorkout ? handleSaveEdit : handleAddWorkout}
+            >
+              {isEditingWorkout ? 'Save Changes' : 'Save Workout'}
+            </Button>
+          </HStack>
+        </Box>
       )}
 
-      <div className="workouts-grid">
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
         {workouts.map(workout => (
-          <div key={workout._id} className="workout-card">
-            <div className="workout-header">
-              <h3>{workout.name}</h3>
-              <div className="workout-actions">
-                <button onClick={() => handleEditWorkout(workout)} className="edit-btn">
-                  <Edit2 size={16} />
-                </button>
-                <button onClick={() => handleCompleteWorkout(workout._id)} className="complete-btn">
-                  <Calendar size={16} />
-                </button>
-                <button onClick={() => handleDeleteWorkout(workout._id)} className="delete-btn">
-                  <Trash2 size={16} />
-                </button>
-                <button onClick={() => viewPreviousLogs(workout)} className="logs-btn">
-                  <History size={16} />
-                </button>
-                <button onClick={() => handleStartWorkout(workout)} className="start-btn">
-                  <Play size={16} />
-                </button>
-              </div>
-            </div>
-            
-            <div className="workout-details">
-              <div className="detail-item">
-                <Clock size={16} />
-                <span>{workout.duration}</span>
-              </div>
-              {workout.lastCompleted && (
-                <div className="detail-item">
-                  <Calendar size={16} />
-                  <span>Last: {new Date(workout.lastCompleted).toLocaleDateString()}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="exercises-list">
-              {workout.exercises.map(exercise => (
-                <div key={exercise._id || exercise.id} className="exercise-item">
-                  <div className="exercise-header">
-                    <span className="exercise-name">{exercise.name}</span>
-                    <span className="exercise-sets">{exercise.sets} sets</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Card key={workout._id} bg={cardBg} borderColor={cardBorderColor} borderWidth="1px">
+            <CardBody>
+              <VStack align="stretch" spacing={4}>
+                <Heading as="h3" size="md" color={textColor}>{workout.name}</Heading>
+                <HStack spacing={4} fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                  <Flex alignItems="center"><Icon as={Clock} mr={1} />{workout.duration || 'N/A'}</Flex>
+                  <Flex alignItems="center"><Icon as={Calendar} mr={1} />Last: {workout.lastCompleted ? new Date(workout.lastCompleted).toLocaleDateString() : 'Never'}</Flex>
+                </HStack>
+                <VStack align="stretch" spacing={2} flex="1">
+                   {workout.exercises.map(exercise => (
+                      <Text key={exercise._id || exercise.id} fontSize="sm" color={textColor}>{exercise.name} ({exercise.sets} sets)</Text>
+                   ))}
+                </VStack>
+                <HStack spacing={2} justifyContent="flex-end">
+                  <Button leftIcon={<Icon as={Play} />} size="sm" colorScheme="green" onClick={() => handleStartWorkout(workout)}>Start</Button>
+                   <Button leftIcon={<Icon as={History} />} size="sm" onClick={() => viewPreviousLogs(workout)}>Logs</Button>
+                  <IconButton icon={<Edit2 size={16} />} size="sm" aria-label="Edit workout" onClick={() => handleEditWorkout(workout)} />
+                  <IconButton icon={<Trash2 size={16} />} size="sm" colorScheme="red" aria-label="Delete workout" onClick={() => handleDeleteWorkout(workout._id)} />
+                </HStack>
+              </VStack>
+            </CardBody>
+          </Card>
         ))}
-      </div>
-    </div>
+
+        {/* "Create New Workout" Card */}
+        <Card onClick={() => setIsAddingWorkout(true)} cursor="pointer" _hover={{ shadow: "md", borderColor: useColorModeValue('brand.400', 'brand.600') }} borderWidth="1px" borderStyle="dashed" borderColor={useColorModeValue('gray.300', 'gray.600')} bg={cardBg}>
+          <CardBody>
+            <Flex direction="column" alignItems="center" justifyContent="center" h="100%" textAlign="center">
+              <Icon as={Dumbbell} boxSize={12} mb={4} color="brand.500" />
+              <Heading as="h3" size="md" mb={2} color={textColor}>Create New Workout</Heading>
+              <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')} mb={4}>Design your custom workout routine</Text>
+              <Button colorScheme="brand" onClick={(e) => { e.stopPropagation(); setIsAddingWorkout(true); }}>
+                Create Workout
+              </Button>
+            </Flex>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+    </Box>
   );
 }
 

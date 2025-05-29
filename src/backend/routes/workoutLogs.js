@@ -70,7 +70,8 @@ router.get('/monthly/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch monthly workout count' });
   }
 });
-router.get ('/weekly/:userId', async (req, res) => {
+
+router.get('/weekly/:userId', async (req, res) => {
   try {
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -94,7 +95,8 @@ router.get ('/weekly/:userId', async (req, res) => {
     console.error('Error fetching weekly workout count:', error);
     res.status(500).json({ error: 'Failed to fetch weekly workout count' });
   }
-})
+});
+
 router.get('/streak/:userId', async (req, res) => {
   try {
     const today = new Date();
@@ -134,6 +136,50 @@ router.get('/streak/:userId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching workout streak:', error);
     res.status(500).json({ error: 'Failed to fetch workout streak' });
+  }
+});
+
+// Get daily workout counts for the bar graph
+router.get('/daily-counts/:userId', async (req, res) => {
+  try {
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date();
+    endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Get all workout logs for the week
+    const workoutLogs = await WorkoutLog.find({
+      userId: req.params.userId,
+      completedAt: {
+        $gte: startOfWeek,
+        $lte: endOfWeek
+      }
+    });
+
+    // Initialize counts for each day
+    const dayCounts = {
+      'Sun': 0,
+      'Mon': 0,
+      'Tue': 0,
+      'Wed': 0,
+      'Thu': 0,
+      'Fri': 0,
+      'Sat': 0
+    };
+
+    // Count workouts for each day
+    workoutLogs.forEach(log => {
+      const day = new Date(log.completedAt).toLocaleDateString('en-US', { weekday: 'short' });
+      dayCounts[day]++;
+    });
+
+    res.json(dayCounts);
+  } catch (error) {
+    console.error('Error fetching daily workout counts:', error);
+    res.status(500).json({ error: 'Failed to fetch daily workout counts' });
   }
 });
 

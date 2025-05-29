@@ -1,28 +1,41 @@
-import React from "react";
+import React from 'react';
 import { Dumbbell, Calendar, Trophy } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Box, Heading, Button, VStack, Card, CardBody } from '@chakra-ui/react';
 
 function QuickActions() {
   const location = useLocation();
 
   return (
-    <div className="quick-actions-container">
-      <div className="quick-actions-title">Quick Actions</div>
-      <div className="quick-actions-list">
-        <Link
-          to="/workouts"
-          className={`quick-action-button nav-item ${location.pathname === "/workouts" ? "active" : ""}`}
-        >
-          <Dumbbell size={16} /> Start Workout
-        </Link>
-        <button className="quick-action-button">
-          <Calendar size={16} /> Schedule
-        </button>
-        <button className="quick-action-button">
-          <Trophy size={16} /> Progress
-        </button>
-      </div>
-    </div>
+    <Card>
+      <CardBody>
+        <Heading as="h3" size="md" mb={4}>Quick Actions</Heading>
+        <VStack spacing={3} align="stretch">
+          <Button
+            as={RouterLink}
+            to="/workouts"
+            leftIcon={<Dumbbell size={16} />}
+            variant="ghost"
+            justifyContent="flex-start"
+            colorScheme="brand"
+            isActive={location.pathname === "/workouts"}
+          >
+            Start Workout
+          </Button>
+          <Button
+            as={RouterLink}
+            to="/schedule"
+            leftIcon={<Calendar size={16} />}
+            variant="ghost"
+            justifyContent="flex-start"
+            colorScheme="brand"
+            isActive={location.pathname === "/schedule"}
+          >
+            Schedule
+          </Button>
+        </VStack>
+      </CardBody>
+    </Card>
   );
 }
 

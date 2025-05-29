@@ -3,4 +3,5 @@ function Title(){
         <title>SculpTrack</title>
     )
 }
+
 export default Title;

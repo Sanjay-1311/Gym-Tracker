@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import workoutRoutes from './routes/workouts.js';
 import workoutLogRoutes from './routes/workoutLogs.js';
 import userRoutes from './routes/users.js';
+import scheduleRoutes from './routes/schedules.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/workout-logs', workoutLogRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/schedules', scheduleRoutes);
 
 // Test database connection
 app.get('/api/test', async (req, res) => {

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { UserPlus, User, Github, Mail } from "lucide-react";
 import { getUserProfile, createUserProfile } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
-import "./SignIn.css";
+import { Box, Heading, Text, VStack, FormControl, FormLabel, Input, Button, Link, Divider, HStack, Icon, useToast, Flex } from '@chakra-ui/react';
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -16,12 +16,21 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const { signup, signInWithGoogle, signInWithGithub } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      return setError("Passwords do not match");
+      setError("Passwords do not match");
+       toast({
+        title: "Sign Up Failed",
+        description: "Passwords do not match.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
     }
 
     try {
@@ -37,14 +46,21 @@ function SignUp() {
         createdAt: new Date().toISOString()
       });
       
-      // Verify the profile was created
-      const user = await getUserProfile(result.user.uid);
-      console.log("User profile created:", user);
+      // Verify the profile was created (Optional, but good for debugging)
+      // const user = await getUserProfile(result.user.uid);
+      // console.log("User profile created:", user);
       
       navigate("/");
     } catch (error) {
       setError("Failed to create an account. " + error.message);
       console.error(error);
+      toast({
+        title: "Sign Up Failed",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
     setLoading(false);
   };
@@ -73,6 +89,13 @@ function SignUp() {
     } catch (error) {
       setError("Failed to sign in with Google.");
       console.error(error);
+       toast({
+        title: "Google Sign Up Failed",
+        description: "An error occurred during Google sign up.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
     setLoading(false);
   };
@@ -101,125 +124,141 @@ function SignUp() {
     } catch (error) {
       setError("Failed to sign in with GitHub.");
       console.error(error);
+       toast({
+        title: "GitHub Sign Up Failed",
+        description: "An error occurred during GitHub sign up.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
     setLoading(false);
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
   return (
-    <div className="signin-page">
-      <title>Sculptrack</title>
-      <div className="signin-container">
-        <div className="signin-header">
-          <h1>Create Account</h1>
-          <p>Join SculptTrack to start your fitness journey</p>
-        </div>
+    <Flex minH="100vh" align="center" justify="center" p={4}>
+      <title>SculpTrack</title>
+      <Box borderWidth="1px" borderRadius="lg" p={8} maxWidth="md" width="100%" boxShadow="lg">
+        <VStack spacing={6} align="stretch">
+          <Box textAlign="center">
+            <Heading as="h1" size="xl">Create Account</Heading>
+            <Text fontSize="lg" color="gray.500">Join SculpTrack to start your fitness journey</Text>
+          </Box>
 
-        {error && <div className="error-message">{error}</div>}
+          {error && (
+            <Box bg="red.100" color="red.800" p={3} borderRadius="md">
+              {error}
+            </Box>
+          )}
 
-        <form onSubmit={handleSubmit} className="signin-form">
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              placeholder="Choose a username"
-              autoComplete="username"
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            <VStack spacing={4}>
+              <FormControl id="username">
+                <FormLabel>Username</FormLabel>
+                <Input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                  placeholder="Choose a username"
+                  autoComplete="username"
+                />
+              </FormControl>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="Enter your email"
-              autoComplete="email"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Create a password"
-              autoComplete="new-password"
-            />
-          </div>
+              <FormControl id="email">
+                <FormLabel>Email address</FormLabel>
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                />
+              </FormControl>
+              
+              <FormControl id="password">
+                <FormLabel>Password</FormLabel>
+                <Input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Create a password"
+                  autoComplete="new-password"
+                />
+              </FormControl>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              placeholder="Confirm your password"
-              autoComplete="new-password"
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            className="signin-button"
-            disabled={loading}
-          >
-            <UserPlus size={20} />
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
+              <FormControl id="confirmPassword">
+                <FormLabel>Confirm Password</FormLabel>
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="Confirm your password"
+                  autoComplete="new-password"
+                />
+              </FormControl>
+              
+              <Button
+                type="submit"
+                colorScheme="brand"
+                width="100%"
+                isLoading={loading}
+                leftIcon={<Icon as={UserPlus} />}
+              >
+                Sign Up
+              </Button>
+            </VStack>
+          </form>
 
-        <div className="signin-divider">or continue with</div>
+          <HStack spacing={2} justifyContent="center" alignItems="center">
+            <Divider orientation="horizontal" flex="1" />
+            <Text fontSize="sm" color="gray.500">or continue with</Text>
+            <Divider orientation="horizontal" flex="1" />
+          </HStack>
 
-        <div className="social-signin">
-          <button 
-            className="social-button"
-            onClick={handleGithubSignIn}
-            disabled={loading}
-          >
-            <Github size={20} />
-            GitHub
-          </button>
-          <button 
-            className="social-button"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-          >
-            <Mail size={20} />
-            Google
-          </button>
-        </div>
+          <VStack spacing={3}>
+             <Button 
+                leftIcon={<Icon as={Github} />} 
+                width="100%" 
+                onClick={handleGithubSignIn}
+                disabled={loading}
+              >
+                Sign up with GitHub
+              </Button>
+               <Button 
+                leftIcon={<Icon as={Mail} />} 
+                width="100%" 
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                Sign up with Google
+              </Button>
+          </VStack>
 
-        <p className="signup-prompt">
-          Already have an account?
-          <Link to="/signin" className="signup-link">
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+          <Text textAlign="center">
+            Already have an account?{' '}
+            <Link as={RouterLink} to="/signin" color="brand.500" fontWeight="bold">
+              Sign in
+            </Link>
+          </Text>
+        </VStack>
+      </Box>
+    </Flex>
   );
 }
 

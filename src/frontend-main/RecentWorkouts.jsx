@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Timer, Calendar, Dumbbell } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Timer, Calendar, Dumbbell, Edit2, Play, History } from "lucide-react";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { getWorkouts } from "../services/api";
+import { Box, Heading, Text, Flex, Button, Card, CardBody, SimpleGrid, Icon, Spacer, useColorModeValue, VStack, HStack } from '@chakra-ui/react';
 
 function RecentWorkouts() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [workouts, setWorkouts] = useState([]);
+
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -21,7 +27,7 @@ function RecentWorkouts() {
             if (!b.lastCompleted) return -1;
             return new Date(b.lastCompleted) - new Date(a.lastCompleted);
           });
-          // Take only the first 2 workouts
+          // Take only the first 2 workouts, plus a slot for 'Create New Workout'
           setWorkouts(sortedWorkouts.slice(0, 2));
         }
       } catch (error) {
@@ -38,51 +44,83 @@ function RecentWorkouts() {
   }, [currentUser]);
 
   return (
-    <div className="recent-workouts-container">
-      <div className="recent-workouts-header">
-        <h2 className="Recent-workout-title">Recent Workouts</h2>
-        <a href="#" className="view-all-link" onClick={() => navigate('/workouts')}>View All</a>
-      </div>
-      <div className="workouts-list">
+    <Box mb={6}>
+      <Flex justifyContent="space-between" alignItems="center" mb={4}>
+        <Heading as="h2" size="lg" color={textColor}>Recent Workouts</Heading>
+        <Button as={RouterLink} to="/workouts" variant="link" colorScheme="brand" size="sm">
+          View All
+        </Button>
+      </Flex>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
         {workouts.map(workout => (
-          <div key={workout._id} className="workout-card">
-            <div className="workout-info">
-              <h3 className="workout-title">{workout.name}</h3>
-              <div className="workout-details">
-                <div className="workout-time">
-                  <Timer size={16} />
-                  <span>{workout.duration}</span>
-                </div>
-                <span className="details-dot">•</span>
-                <div className="workout-date">
-                  <Calendar size={16} />
-                  <span>Last: {workout.lastCompleted ? new Date(workout.lastCompleted).toLocaleDateString() : 'Never'}</span>
-                  
-                </div>
-              </div>
-            </div>
-            <div className="workout-actions">
-              <button className="start-workout-btn" onClick={() => navigate('/logging', { state: { workout } })}>
-                <Dumbbell size={16} />
-                <span>Start</span>
-              </button>
-              <button className="edit-workout-btn" onClick={() => navigate('/workouts')}>Edit</button>
-            </div>
-          </div>
+          <Card key={workout._id} bg={cardBg} borderColor={cardBorderColor} borderWidth="1px">
+            <CardBody>
+              <Flex direction="column" justifyContent="space-between" h="100%">
+                <Box>
+                  <Heading as="h3" size="md" mb={2} color={textColor}>{workout.name}</Heading>
+                  <Box fontSize="sm" color={mutedTextColor}>
+                    <Flex alignItems="center" mb={1}>
+                      <Icon as={Timer} mr={1} />
+                      <Text>{workout.duration || 'N/A'}</Text>
+                    </Flex>
+                    <Flex alignItems="center">
+                       <Icon as={Calendar} mr={1} />
+                      <Text>Last: {workout.lastCompleted ? new Date(workout.lastCompleted).toLocaleDateString() : 'Never'}</Text>
+                    </Flex>
+                  </Box>
+                </Box>
+                 <Spacer />
+                <Flex mt={4} gap={2}>
+                  <Button
+                    leftIcon={<Icon as={Play} />}
+                    colorScheme="green"
+                    onClick={() => navigate('/logging', { state: { workout } })}
+                    size="sm"
+                    flex="1"
+                  >
+                    Start
+                  </Button>
+                  <Button
+                    leftIcon={<Icon as={History} />}
+                    variant="outline"
+                    colorScheme="gray"
+                    onClick={() => navigate('/prev', { state: { workout } })}
+                    size="sm"
+                    flex="1"
+                  >
+                    Logs
+                  </Button>
+                   <Button
+                    leftIcon={<Icon as={Edit2} />}
+                    variant="outline"
+                    colorScheme="gray"
+                    onClick={() => navigate('/workouts')}
+                    size="sm"
+                     flex="1"
+                  >
+                    Edit
+                  </Button>
+                </Flex>
+              </Flex>
+            </CardBody>
+          </Card>
         ))}
 
-        <div className="workout-card new-workout-card">
-          <div className="new-workout-content">
-            <div className="new-workout-icon">
-              <Dumbbell size={32} />
-            </div>
-            <h3 className="new-workout-title">Create New Workout</h3>
-            <p className="new-workout-subtitle">Design your custom workout routine</p>
-            <button onClick={() => navigate('/workouts')} className="create-workout-btn">Create Workout</button>
-          </div>
-        </div>
-      </div>
-    </div>
+        {/* "Create New Workout" Card */}
+        <Card onClick={() => navigate('/workouts')} cursor="pointer" _hover={{ shadow: "md", borderColor: useColorModeValue('brand.400', 'brand.600') }} borderWidth="1px" borderStyle="dashed" borderColor={useColorModeValue('gray.300', 'gray.600')} bg={cardBg}>
+          <CardBody>
+            <Flex direction="column" alignItems="center" justifyContent="center" h="100%" textAlign="center">
+              <Icon as={Dumbbell} boxSize={12} mb={4} color="brand.500" />
+              <Heading as="h3" size="md" mb={2} color={textColor}>Create New Workout</Heading>
+              <Text fontSize="sm" color={mutedTextColor} mb={4}>Design your custom workout routine</Text>
+              <Button colorScheme="brand" onClick={(e) => { e.stopPropagation(); navigate('/workouts'); }}>
+                Create Workout
+              </Button>
+            </Flex>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+    </Box>
   );
 }
 

@@ -117,3 +117,50 @@ export const getWorkoutStreak = async (userId) => {
   if (!response.ok) throw new Error('Failed to fetch workout streak');
   return response.json();
 };
+
+export const getDailyWorkoutCounts = async (userId) => {
+  const response = await fetch(`${API_URL}/workout-logs/daily-counts/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch daily workout counts');
+  return response.json();
+};
+
+export const getAllWorkouts = async (userId) => {
+  const response = await fetch(`${API_URL}/workouts/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch workouts');
+  return response.json();
+};
+
+// Schedule API calls
+export const getSchedules = async (userId) => {
+  const response = await fetch(`${API_URL}/schedules/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch schedules');
+  return response.json();
+};
+
+export const createSchedule = async (scheduleData) => {
+  const response = await fetch(`${API_URL}/schedules`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(scheduleData)
+  });
+  if (!response.ok) throw new Error('Failed to create schedule');
+  return response.json();
+};
+
+export const updateScheduleStatus = async (scheduleId, status) => {
+  const response = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  if (!response.ok) throw new Error('Failed to update schedule');
+  return response.json();
+};
+
+export const deleteSchedule = async (scheduleId) => {
+  const response = await fetch(`${API_URL}/schedules/${scheduleId}`, {
+    method: 'DELETE'
+  });
+  if (!response.ok) throw new Error('Failed to delete schedule');
+  return response.json();
+};
