@@ -1,5 +1,6 @@
 import express from 'express';
 import Workout from '../models/Workout.js';
+import WorkoutLog from '../models/WorkoutLog.js';
 
 const router = express.Router();
 
@@ -49,13 +50,17 @@ router.put('/:workoutId', async (req, res) => {
 // Delete a workout
 router.delete('/:workoutId', async (req, res) => {
   try {
+    // Delete all associated workout logs first
+    await WorkoutLog.deleteMany({ workoutId: req.params.workoutId });
+    
+    // Then delete the workout
     const workout = await Workout.findByIdAndDelete(req.params.workoutId);
     
     if (!workout) {
       return res.status(404).json({ error: 'Workout not found' });
     }
     
-    res.json({ message: 'Workout deleted successfully' });
+    res.json({ message: 'Workout and associated logs deleted successfully' });
   } catch (error) {
     console.error('Error deleting workout:', error);
     res.status(500).json({ error: 'Failed to delete workout' });
