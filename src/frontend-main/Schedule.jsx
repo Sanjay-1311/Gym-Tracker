@@ -199,7 +199,6 @@ const Schedule = () => {
                 </MenuButton>
                 <MenuList>
                   <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
-                  <MenuItem onClick={() => navigate('/settings')}>Settings</MenuItem>
                   <Divider />
                   <MenuItem color="red.500" onClick={handleSignOut}>Sign Out</MenuItem>
                 </MenuList>

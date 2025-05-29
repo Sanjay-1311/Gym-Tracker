@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Dumbbell, ChartBar, Calendar, User, Settings, LogOut } from 'lucide-react';
+import { Dumbbell, ChartBar, Calendar, User, LogOut } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import MotivationalQuote from './MotivationalQuote';
 import ColorModeToggle from './components/ColorModeToggle';
@@ -127,7 +127,6 @@ function DashboardHeader() {
               <MenuButton
                 as={Button}
                 variant="ghost"
-                rightIcon={<Settings size={20} />}
                 colorScheme="brand"
               >
                 {username}
@@ -138,12 +137,6 @@ function DashboardHeader() {
                   onClick={() => navigate('/profile')}
                 >
                   Profile
-                </MenuItem>
-                <MenuItem 
-                  icon={<Settings size={16} />}
-                  onClick={() => navigate('/settings')}
-                >
-                  Settings
                 </MenuItem>
                 <Divider />
                 <MenuItem
