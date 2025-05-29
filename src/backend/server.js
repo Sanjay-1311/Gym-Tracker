@@ -6,6 +6,7 @@ import workoutRoutes from './routes/workouts.js';
 import workoutLogRoutes from './routes/workoutLogs.js';
 import userRoutes from './routes/users.js';
 import scheduleRoutes from './routes/schedules.js';
+import path from 'path';
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
-
+const __dirname = path.resolve();
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -33,6 +34,15 @@ app.get('/api/test', async (req, res) => {
     res.status(500).json({ error: 'Database connection failed' });
   }
 });
+
+// Serve frontend
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend-main/dist')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend-main/dist', 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 
