@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:5000/api';
+//URL Updated to use the correct API URL
+ const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:5000/api';
 
 // User API calls
 export const getUserProfile = async (userId) => {
