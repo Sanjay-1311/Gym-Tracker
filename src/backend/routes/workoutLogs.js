@@ -70,5 +70,71 @@ router.get('/monthly/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch monthly workout count' });
   }
 });
+router.get ('/weekly/:userId', async (req, res) => {
+  try {
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date();
+    endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Count all workout logs for the week
+    const count = await WorkoutLog.countDocuments({
+      userId: req.params.userId,
+      completedAt: {
+        $gte: startOfWeek,
+        $lte: endOfWeek
+      }
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error('Error fetching weekly workout count:', error);
+    res.status(500).json({ error: 'Failed to fetch weekly workout count' });
+  }
+})
+router.get('/streak/:userId', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Find the most recent workout log
+    const lastLog = await WorkoutLog.findOne({
+      userId: req.params.userId,
+      completedAt: { $lte: today }
+    }).sort({ completedAt: -1 });
+
+    if (!lastLog) {
+      return res.json({ streak: 0 });
+    }
+
+    let streak = 1;
+    let currentDate = new Date(lastLog.completedAt);
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Check for consecutive days
+    while (true) {
+      currentDate.setDate(currentDate.getDate() - 1);
+      const nextLog = await WorkoutLog.findOne({
+        userId: req.params.userId,
+        completedAt: { $gte: currentDate },
+        completedAt: { $lt: new Date(currentDate.getTime() + 24 * 60 * 60 * 1000) }
+      });
+
+      if (nextLog) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    res.json({ streak });
+  } catch (error) {
+    console.error('Error fetching workout streak:', error);
+    res.status(500).json({ error: 'Failed to fetch workout streak' });
+  }
+});
 
 export default router; 

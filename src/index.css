@@ -126,6 +126,7 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  
 }
 
 .stat-card {
@@ -133,6 +134,7 @@ body {
   padding: 1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
 }
 
 .stat-title {

@@ -107,3 +107,13 @@ export const getMonthlyWorkoutCount = async (userId) => {
   if (!response.ok) throw new Error('Failed to fetch monthly workout count');
   return response.json();
 }; 
+export const getWeeklyWorkoutCount = async (userId) => {
+  const response = await fetch (`${API_URL}/workout-logs/weekly/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch weekly workout count');
+  return response.json();
+}
+export const getWorkoutStreak = async (userId) => {
+  const response = await fetch(`${API_URL}/workout-logs/streak/${userId}`);
+  if (!response.ok) throw new Error('Failed to fetch workout streak');
+  return response.json();
+};
