@@ -99,8 +99,9 @@ router.get('/weekly/:userId', async (req, res) => {
 
 router.get('/streak/:userId', async (req, res) => {
   try {
+    // Get today's date in local timezone
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
     // Find the most recent workout log
     const lastLog = await WorkoutLog.findOne({
@@ -112,17 +113,32 @@ router.get('/streak/:userId', async (req, res) => {
       return res.json({ streak: 0 });
     }
 
+    // Convert last workout date to local timezone
+    const lastWorkoutDate = new Date(lastLog.completedAt);
+    const lastWorkoutStart = new Date(lastWorkoutDate.getFullYear(), lastWorkoutDate.getMonth(), lastWorkoutDate.getDate());
+
+    // Calculate days since last workout
+    const daysSinceLastWorkout = Math.floor((todayStart - lastWorkoutStart) / (1000 * 60 * 60 * 24));
+
+    // If more than 1 day gap, streak is broken
+    if (daysSinceLastWorkout > 1) {
+      return res.json({ streak: 0 });
+    }
+
     let streak = 1;
-    let currentDate = new Date(lastLog.completedAt);
-    currentDate.setHours(0, 0, 0, 0);
+    let currentDate = new Date(lastWorkoutStart);
 
     // Check for consecutive days
     while (true) {
       currentDate.setDate(currentDate.getDate() - 1);
+      const currentDateStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+
       const nextLog = await WorkoutLog.findOne({
         userId: req.params.userId,
-        completedAt: { $gte: currentDate },
-        completedAt: { $lt: new Date(currentDate.getTime() + 24 * 60 * 60 * 1000) }
+        completedAt: {
+          $gte: currentDateStart,
+          $lt: new Date(currentDateStart.getTime() + 24 * 60 * 60 * 1000)
+        }
       });
 
       if (nextLog) {
@@ -130,6 +146,11 @@ router.get('/streak/:userId', async (req, res) => {
       } else {
         break;
       }
+    }
+
+    // If the last workout was yesterday, we don't count today in the streak
+    if (daysSinceLastWorkout === 1) {
+      streak--;
     }
 
     res.json({ streak });
@@ -180,6 +201,25 @@ router.get('/daily-counts/:userId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching daily workout counts:', error);
     res.status(500).json({ error: 'Failed to fetch daily workout counts' });
+  }
+});
+
+// Debug route to get all workout logs with dates
+router.get('/debug/:userId', async (req, res) => {
+  try {
+    const logs = await WorkoutLog.find({ userId: req.params.userId })
+      .sort({ completedAt: -1 })
+      .select('completedAt');
+    
+    const formattedLogs = logs.map(log => ({
+      date: log.completedAt.toISOString(),
+      day: new Date(log.completedAt).toLocaleDateString()
+    }));
+    
+    res.json(formattedLogs);
+  } catch (error) {
+    console.error('Error fetching debug logs:', error);
+    res.status(500).json({ error: 'Failed to fetch debug logs' });
   }
 });
 

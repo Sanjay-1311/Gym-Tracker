@@ -10,6 +10,20 @@ function Workouts() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const toast = useToast();
+  
+  // Move all useColorModeValue hooks to the top
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const inputBg = useColorModeValue('white', 'gray.800');
+  const inputBorderColor = useColorModeValue('gray.200', 'gray.600');
+  const exerciseItemBorderColor = useColorModeValue('gray.200', 'gray.700');
+  const exerciseItemBg = useColorModeValue('gray.50', 'gray.600');
+  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
+  const createCardBorderColor = useColorModeValue('gray.300', 'gray.600');
+  const createCardHoverBorderColor = useColorModeValue('brand.400', 'brand.600');
+  const createCardTextColor = useColorModeValue('gray.600', 'gray.400');
+
   const [workouts, setWorkouts] = useState([]);
   const [isAddingWorkout, setIsAddingWorkout] = useState(false);
   const [isEditingWorkout, setIsEditingWorkout] = useState(false);
@@ -24,13 +38,6 @@ function Workouts() {
     name: '',
     sets: ''
   });
-
-  const cardBg = useColorModeValue('white', 'gray.700');
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.600');
-  const textColor = useColorModeValue('gray.800', 'white');
-  const inputBg = useColorModeValue('white', 'gray.800');
-  const inputBorderColor = useColorModeValue('gray.200', 'gray.600');
-  const exerciseItemBorderColor = useColorModeValue('gray.200', 'gray.700');
 
   useEffect(() => {
     loadWorkouts();
@@ -265,7 +272,7 @@ function Workouts() {
                 placeholder="e.g., 45 min"
                 value={newWorkout.duration}
                 onChange={(e) => setNewWorkout(prev => ({ ...prev, duration: e.target.value }))}
-                 bg={inputBg}
+                bg={inputBg}
                 borderColor={inputBorderColor}
                 color={textColor}
               />
@@ -276,10 +283,19 @@ function Workouts() {
             <Heading as="h3" size="md" mb={3}>Exercises</Heading>
             <VStack spacing={3} align="stretch" mb={4}>
               {newWorkout.exercises.map((exercise) => (
-                <Flex key={exercise._id || exercise.id} justifyContent="space-between" alignItems="center" p={3} borderWidth="1px" borderRadius="md" borderColor={exerciseItemBorderColor} bg={useColorModeValue('gray.50', 'gray.600')}>
+                <Flex 
+                  key={exercise._id || exercise.id} 
+                  justifyContent="space-between" 
+                  alignItems="center" 
+                  p={3} 
+                  borderWidth="1px" 
+                  borderRadius="md" 
+                  borderColor={exerciseItemBorderColor} 
+                  bg={exerciseItemBg}
+                >
                   <Box>
                     <Text fontWeight="bold">{exercise.name}</Text>
-                    <Text fontSize="sm" color="gray.500">{exercise.sets} sets</Text>
+                    <Text fontSize="sm" color={mutedTextColor}>{exercise.sets} sets</Text>
                   </Box>
                   <IconButton
                     icon={<Trash2 size={16} />}
@@ -295,15 +311,15 @@ function Workouts() {
 
             <HStack spacing={3}>
               <FormControl flex="1">
-                 <FormLabel>Exercise Name</FormLabel>
+                <FormLabel>Exercise Name</FormLabel>
                 <Input
                   type="text"
                   placeholder="Enter exercise name"
                   value={newExercise.name}
                   onChange={(e) => setNewExercise(prev => ({ ...prev, name: e.target.value }))}
-                   bg={inputBg}
-                borderColor={inputBorderColor}
-                color={textColor}
+                  bg={inputBg}
+                  borderColor={inputBorderColor}
+                  color={textColor}
                 />
               </FormControl>
               <FormControl w="100px">
@@ -313,9 +329,9 @@ function Workouts() {
                   placeholder="Sets"
                   value={newExercise.sets}
                   onChange={(e) => setNewExercise(prev => ({ ...prev, sets: e.target.value }))}
-                   bg={inputBg}
-                borderColor={inputBorderColor}
-                color={textColor}
+                  bg={inputBg}
+                  borderColor={inputBorderColor}
+                  color={textColor}
                 />
               </FormControl>
               <Button onClick={handleAddExercise} colorScheme="brand" mt={8}>Add Exercise</Button>
@@ -355,18 +371,18 @@ function Workouts() {
             <CardBody>
               <VStack align="stretch" spacing={4}>
                 <Heading as="h3" size="md" color={textColor}>{workout.name}</Heading>
-                <HStack spacing={4} fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
+                <HStack spacing={4} fontSize="sm" color={mutedTextColor}>
                   <Flex alignItems="center"><Icon as={Clock} mr={1} />{workout.duration || 'N/A'}</Flex>
                   <Flex alignItems="center"><Icon as={Calendar} mr={1} />Last: {workout.lastCompleted ? new Date(workout.lastCompleted).toLocaleDateString() : 'Never'}</Flex>
                 </HStack>
                 <VStack align="stretch" spacing={2} flex="1">
-                   {workout.exercises.map(exercise => (
-                      <Text key={exercise._id || exercise.id} fontSize="sm" color={textColor}>{exercise.name} ({exercise.sets} sets)</Text>
-                   ))}
+                  {workout.exercises.map(exercise => (
+                    <Text key={exercise._id || exercise.id} fontSize="sm" color={textColor}>{exercise.name} ({exercise.sets} sets)</Text>
+                  ))}
                 </VStack>
                 <HStack spacing={2} justifyContent="flex-end">
                   <Button leftIcon={<Icon as={Play} />} size="sm" colorScheme="green" onClick={() => handleStartWorkout(workout)}>Start</Button>
-                   <Button leftIcon={<Icon as={History} />} size="sm" onClick={() => viewPreviousLogs(workout)}>Logs</Button>
+                  <Button leftIcon={<Icon as={History} />} size="sm" onClick={() => viewPreviousLogs(workout)}>Logs</Button>
                   <IconButton icon={<Edit2 size={16} />} size="sm" aria-label="Edit workout" onClick={() => handleEditWorkout(workout)} />
                   <IconButton icon={<Trash2 size={16} />} size="sm" colorScheme="red" aria-label="Delete workout" onClick={() => handleDeleteWorkout(workout._id)} />
                 </HStack>
@@ -376,12 +392,20 @@ function Workouts() {
         ))}
 
         {/* "Create New Workout" Card */}
-        <Card onClick={() => setIsAddingWorkout(true)} cursor="pointer" _hover={{ shadow: "md", borderColor: useColorModeValue('brand.400', 'brand.600') }} borderWidth="1px" borderStyle="dashed" borderColor={useColorModeValue('gray.300', 'gray.600')} bg={cardBg}>
+        <Card 
+          onClick={() => setIsAddingWorkout(true)} 
+          cursor="pointer" 
+          _hover={{ shadow: "md", borderColor: createCardHoverBorderColor }} 
+          borderWidth="1px" 
+          borderStyle="dashed" 
+          borderColor={createCardBorderColor} 
+          bg={cardBg}
+        >
           <CardBody>
             <Flex direction="column" alignItems="center" justifyContent="center" h="100%" textAlign="center">
               <Icon as={Dumbbell} boxSize={12} mb={4} color="brand.500" />
               <Heading as="h3" size="md" mb={2} color={textColor}>Create New Workout</Heading>
-              <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')} mb={4}>Design your custom workout routine</Text>
+              <Text fontSize="sm" color={createCardTextColor} mb={4}>Design your custom workout routine</Text>
               <Button colorScheme="brand" onClick={(e) => { e.stopPropagation(); setIsAddingWorkout(true); }}>
                 Create Workout
               </Button>

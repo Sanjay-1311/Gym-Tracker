@@ -77,24 +77,32 @@ function PreviousLogs() {
   if (!workout) return null;
 
   return (
-    <Container maxW="container.md" py={8}>
-      <VStack spacing={6} align="stretch">
-        <Flex justifyContent="space-between" alignItems="center">
-          <Button onClick={() => navigate('/workouts')} variant="link" colorScheme="gray" leftIcon={<Icon as={ArrowLeft} />}>
+    <Container maxW="container.md" py={{ base: 4, md: 8 }} px={{ base: 3, md: 4 }}>
+      <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+        <Flex justifyContent="space-between" alignItems="center" flexDir={{ base: "column", md: "row" }} gap={{ base: 2, md: 0 }}>
+          <Button 
+            onClick={() => navigate('/workouts')} 
+            variant="link" 
+            colorScheme="gray" 
+            leftIcon={<Icon as={ArrowLeft} />}
+            alignSelf={{ base: "flex-start", md: "auto" }}
+          >
             Back to Workouts
           </Button>
-          <Heading as="h1" size="xl" color={textColor}>Previous Logs - {workout.name}</Heading>
+          <Heading as="h1" size={{ base: "lg", md: "xl" }} color={textColor} textAlign={{ base: "center", md: "left" }}>
+            Previous Logs - {workout.name}
+          </Heading>
         </Flex>
 
-        <HStack spacing={4} color={mutedTextColor}>
+        <HStack spacing={4} color={mutedTextColor} flexWrap="wrap" justify={{ base: "center", md: "flex-start" }}>
           <Flex alignItems="center">
             <Icon as={Clock} mr={1} />
-            <Text>{workout.duration}</Text>
+            <Text fontSize={{ base: "sm", md: "md" }}>{workout.duration}</Text>
           </Flex>
           {workout.lastCompleted && (
             <Flex alignItems="center">
               <Icon as={Calendar} mr={1} />
-              <Text>Last: {new Date(workout.lastCompleted).toLocaleDateString()}</Text>
+              <Text fontSize={{ base: "sm", md: "md" }}>Last: {new Date(workout.lastCompleted).toLocaleDateString()}</Text>
             </Flex>
           )}
         </HStack>
@@ -105,18 +113,23 @@ function PreviousLogs() {
             {workoutLogs.length > 0 ? (
               workoutLogs.map((log) => (
                 <Card key={log._id} bg={cardBg} borderColor={borderColor} borderWidth="1px">
-                  <CardBody>
-                    <VStack spacing={4} align="stretch">
-                      <Flex justifyContent="space-between" alignItems="center">
-                        <Heading as="h3" size="md" color={textColor}>{workout.name}</Heading>
+                  <CardBody p={{ base: 3, md: 4 }}>
+                    <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+                      <Flex 
+                        justifyContent="space-between" 
+                        alignItems="center"
+                        flexDir={{ base: "column", md: "row" }}
+                        gap={{ base: 2, md: 0 }}
+                      >
+                        <Heading as="h3" size={{ base: "sm", md: "md" }} color={textColor}>{workout.name}</Heading>
                         <HStack spacing={4} alignItems="center">
-                            <Text fontSize="sm" color={mutedTextColor}>
+                            <Text fontSize={{ base: "xs", md: "sm" }} color={mutedTextColor}>
                               {new Date(log.completedAt).toLocaleDateString()}
                             </Text>
                             <IconButton 
                               icon={<Icon as={Trash2} size={16} />}
                               onClick={() => handleDeleteLog(log._id)}
-                              size="sm"
+                              size={{ base: "xs", md: "sm" }}
                               colorScheme="red"
                               variant="ghost"
                               aria-label="Delete Log"
@@ -124,27 +137,26 @@ function PreviousLogs() {
                         </HStack>
                       </Flex>
                       
-                      <TableContainer>
+                      <TableContainer overflowX="auto" maxW="100%">
                          <Table variant="simple" size="sm">
                             <Thead>
                                 <Tr bg={tableHeaderBg}>
-                                    <Th color={textColor}>Set</Th>
-                                    <Th color={textColor}>Weight (kg)</Th>
-                                    <Th color={textColor}>Reps</Th>
+                                    <Th color={textColor} px={{ base: 2, md: 4 }}>Set</Th>
+                                    <Th color={textColor} px={{ base: 2, md: 4 }}>Weight (kg)</Th>
+                                    <Th color={textColor} px={{ base: 2, md: 4 }}>Reps</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
                                 {log.exercises.map(exercise => (
-                                    // Assuming each exercise in a log has sets
                                     <React.Fragment key={exercise._id || exercise.id}>
                                       <Tr>
-                                        <Td colSpan={3} fontWeight="bold" color={textColor}>{exercise.name}</Td>
+                                        <Td colSpan={3} fontWeight="bold" color={textColor} px={{ base: 2, md: 4 }}>{exercise.name}</Td>
                                       </Tr>
                                         {exercise.sets.map((set, setIndex) => (
                                             <Tr key={`${exercise._id || exercise.id}-${setIndex}`}>
-                                                <Td color={mutedTextColor}>{set.setNumber}</Td>
-                                                <Td color={mutedTextColor}>{set.weight || '-'}</Td>
-                                                <Td color={mutedTextColor}>{set.reps || '-'}</Td>
+                                                <Td color={mutedTextColor} px={{ base: 2, md: 4 }}>{set.setNumber}</Td>
+                                                <Td color={mutedTextColor} px={{ base: 2, md: 4 }}>{set.weight || '-'}</Td>
+                                                <Td color={mutedTextColor} px={{ base: 2, md: 4 }}>{set.reps || '-'}</Td>
                                             </Tr>
                                         ))}
                                     </React.Fragment>
