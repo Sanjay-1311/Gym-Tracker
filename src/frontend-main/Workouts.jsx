@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useAuth } from './contexts/AuthContext';
 import { getWorkouts, createWorkout, updateWorkout, deleteWorkout } from './services/api';
 import { Box, Heading, Text, Flex, Button, VStack, HStack, Input, FormControl, FormLabel, IconButton, useToast, Card, CardBody, SimpleGrid, Icon, Spacer, useColorModeValue } from '@chakra-ui/react';
+import { exerciseNames } from './data/exerciseNames';
 
 function Workouts() {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ function Workouts() {
   const createCardBorderColor = useColorModeValue('gray.300', 'gray.600');
   const createCardHoverBorderColor = useColorModeValue('brand.400', 'brand.600');
   const createCardTextColor = useColorModeValue('gray.600', 'gray.400');
+  const dropdownBg = useColorModeValue('white', 'gray.700');
+  const dropdownHoverBg = useColorModeValue('blue.50', 'blue.900');
+  const dropdownTextColor = useColorModeValue('gray.800', 'white');
 
   const [workouts, setWorkouts] = useState([]);
   const [isAddingWorkout, setIsAddingWorkout] = useState(false);
@@ -37,6 +41,12 @@ function Workouts() {
   const [newExercise, setNewExercise] = useState({
     name: '',
     sets: ''
+  });
+  const [exerciseDropdown, setExerciseDropdown] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [formErrors, setFormErrors] = useState({
+    workoutName: false,
+    exercises: false
   });
 
   useEffect(() => {
@@ -62,39 +72,60 @@ function Workouts() {
   };
 
   const handleAddWorkout = async () => {
-    if (newWorkout.name.trim() && newWorkout.exercises.length > 0) {
-      try {
-        const workoutData = {
-          userId: currentUser.uid,
-          name: newWorkout.name,
-          duration: newWorkout.duration,
-          exercises: newWorkout.exercises
-        };
-        await createWorkout(workoutData);
-        await loadWorkouts();
-        toast({
-          title: 'Workout created.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        setNewWorkout({
-          name: '',
-          duration: '',
-          exercises: [],
-          lastCompleted: null
-        });
-        setIsAddingWorkout(false);
-      } catch (error) {
-        console.error('Error creating workout:', error);
-        toast({
-          title: 'Error creating workout.',
-          description: error.message,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      }
+    // Reset errors
+    setFormErrors({
+      workoutName: false,
+      exercises: false
+    });
+
+    // Validate
+    const errors = {
+      workoutName: !newWorkout.name.trim(),
+      exercises: newWorkout.exercises.length === 0
+    };
+
+    if (errors.workoutName || errors.exercises) {
+      setFormErrors(errors);
+      toast({
+        title: 'Please fill in all required fields',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      const workoutData = {
+        userId: currentUser.uid,
+        name: newWorkout.name,
+        duration: newWorkout.duration,
+        exercises: newWorkout.exercises
+      };
+      await createWorkout(workoutData);
+      await loadWorkouts();
+      toast({
+        title: 'Workout created.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      setNewWorkout({
+        name: '',
+        duration: '',
+        exercises: [],
+        lastCompleted: null
+      });
+      setIsAddingWorkout(false);
+    } catch (error) {
+      console.error('Error creating workout:', error);
+      toast({
+        title: 'Error creating workout.',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -184,7 +215,30 @@ function Workouts() {
   };
 
   const handleSaveEdit = async () => {
-    if (editingWorkout && newWorkout.name.trim() && newWorkout.exercises.length > 0) {
+    // Reset errors
+    setFormErrors({
+      workoutName: false,
+      exercises: false
+    });
+
+    // Validate
+    const errors = {
+      workoutName: !newWorkout.name.trim(),
+      exercises: newWorkout.exercises.length === 0
+    };
+
+    if (errors.workoutName || errors.exercises) {
+      setFormErrors(errors);
+      toast({
+        title: 'Please fill in all required fields',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (editingWorkout) {
       try {
         await updateWorkout(editingWorkout._id, {
           name: newWorkout.name,
@@ -192,7 +246,7 @@ function Workouts() {
           exercises: newWorkout.exercises
         });
         await loadWorkouts();
-         toast({
+        toast({
           title: 'Workout updated.',
           status: 'success',
           duration: 3000,
@@ -208,7 +262,7 @@ function Workouts() {
         });
       } catch (error) {
         console.error('Error updating workout:', error);
-         toast({
+        toast({
           title: 'Error updating workout.',
           description: error.message,
           status: 'error',
@@ -224,6 +278,27 @@ function Workouts() {
       ...prev,
       exercises: prev.exercises.filter(ex => (ex._id !== exerciseId) && (ex.id !== exerciseId))
     }));
+  };
+
+  const handleExerciseNameChange = (e) => {
+    const value = e.target.value;
+    setNewExercise(prev => ({ ...prev, name: value }));
+    if (value.trim() === '') {
+      setExerciseDropdown([]);
+      setShowDropdown(false);
+      return;
+    }
+    const matches = exerciseNames.filter(name =>
+      name.toLowerCase().includes(value.toLowerCase())
+    );
+    setExerciseDropdown(matches);
+    setShowDropdown(matches.length > 0);
+  };
+
+  const handleDropdownSelect = (name) => {
+    setNewExercise(prev => ({ ...prev, name }));
+    setExerciseDropdown([]);
+    setShowDropdown(false);
   };
 
   return (
@@ -253,17 +328,25 @@ function Workouts() {
         <Box mb={6} p={6} borderWidth="1px" borderRadius="lg" bg={cardBg} borderColor={cardBorderColor}>
           <Heading as="h2" size="lg" mb={4}>{isEditingWorkout ? 'Edit Workout' : 'Create New Workout'}</Heading>
           <VStack spacing={4} align="stretch" mb={6}>
-            <FormControl>
-              <FormLabel>Workout Name</FormLabel>
+            <FormControl isInvalid={formErrors.workoutName}>
+              <FormLabel>Workout Name <Text as="span" color="red.500">*</Text></FormLabel>
               <Input
                 type="text"
                 placeholder="Enter workout name"
                 value={newWorkout.name}
-                onChange={(e) => setNewWorkout(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => {
+                  setNewWorkout(prev => ({ ...prev, name: e.target.value }));
+                  setFormErrors(prev => ({ ...prev, workoutName: false }));
+                }}
                 bg={inputBg}
                 borderColor={inputBorderColor}
                 color={textColor}
               />
+              {formErrors.workoutName && (
+                <Text color="red.500" fontSize="sm" mt={1}>
+                  Workout name is required
+                </Text>
+              )}
             </FormControl>
             <FormControl>
               <FormLabel>Duration (optional)</FormLabel>
@@ -280,7 +363,14 @@ function Workouts() {
           </VStack>
 
           <Box mb={6}>
-            <Heading as="h3" size="md" mb={3}>Exercises</Heading>
+            <Heading as="h3" size="md" mb={3}>
+              Exercises <Text as="span" color="red.500">*</Text>
+              {formErrors.exercises && (
+                <Text as="span" color="red.500" fontSize="sm" ml={2}>
+                  (At least one exercise is required)
+                </Text>
+              )}
+            </Heading>
             <VStack spacing={3} align="stretch" mb={4}>
               {newWorkout.exercises.map((exercise) => (
                 <Flex 
@@ -310,17 +400,48 @@ function Workouts() {
             </VStack>
 
             <HStack spacing={3}>
-              <FormControl flex="1">
+              <FormControl flex="1" position="relative">
                 <FormLabel>Exercise Name</FormLabel>
                 <Input
                   type="text"
                   placeholder="Enter exercise name"
                   value={newExercise.name}
-                  onChange={(e) => setNewExercise(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={handleExerciseNameChange}
+                  onFocus={() => setShowDropdown(exerciseDropdown.length > 0)}
+                  autoComplete="off"
                   bg={inputBg}
                   borderColor={inputBorderColor}
                   color={textColor}
                 />
+                {showDropdown && (
+                  <Box
+                    position="absolute"
+                    zIndex={10}
+                    bg={dropdownBg}
+                    borderWidth="1px"
+                    borderColor={inputBorderColor}
+                    borderRadius="md"
+                    mt={1}
+                    width="100%"
+                    maxH="200px"
+                    overflowY="auto"
+                    boxShadow="lg"
+                  >
+                    {exerciseDropdown.map((name, idx) => (
+                      <Box
+                        key={idx}
+                        px={3}
+                        py={2}
+                        cursor="pointer"
+                        color={dropdownTextColor}
+                        _hover={{ bg: dropdownHoverBg }}
+                        onMouseDown={() => handleDropdownSelect(name)}
+                      >
+                        {name}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
               </FormControl>
               <FormControl w="100px">
                 <FormLabel>Sets</FormLabel>

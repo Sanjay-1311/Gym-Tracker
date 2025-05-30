@@ -20,6 +20,7 @@ import {
   CardBody,
   useColorModeValue,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 
 function Logging() {
@@ -28,6 +29,8 @@ function Logging() {
   const { currentUser } = useAuth();
   const workout = location.state?.workout;
   const [exerciseLogs, setExerciseLogs] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
+  const toast = useToast();
 
   const bgColor = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'white');
@@ -96,7 +99,44 @@ function Logging() {
     );
   };
 
+  const validateForm = () => {
+    const errors = {};
+    let hasErrors = false;
+
+    exerciseLogs.forEach((exercise, exerciseIndex) => {
+      exercise.sets.forEach((set, setIndex) => {
+        const setKey = `${exercise.id}-${setIndex}`;
+        
+        // Validate reps
+        if (!set.reps || isNaN(set.reps) || set.reps <= 0) {
+          errors[`${setKey}-reps`] = true;
+          hasErrors = true;
+        }
+
+        // Validate weight
+        if (!set.weight || isNaN(set.weight) || set.weight < 0) {
+          errors[`${setKey}-weight`] = true;
+          hasErrors = true;
+        }
+      });
+    });
+
+    setFormErrors(errors);
+    return !hasErrors;
+  };
+
   const handleSaveLog = async () => {
+    if (!validateForm()) {
+      toast({
+        title: 'Please fill in all required fields correctly',
+        description: 'Reps must be greater than 0 and weight must be a valid number',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       const logData = {
         userId: currentUser.uid,
@@ -107,18 +147,24 @@ function Logging() {
           sets: exercise.sets.map((set, index) => ({
             exerciseId: exercise._id || exercise.id,
             setNumber: index + 1,
-            reps: set.reps,
-            weight: set.weight
+            reps: parseFloat(set.reps),
+            weight: parseFloat(set.weight)
           }))
         }))
       };
 
       await createWorkoutLog(logData);
-      // Update the workout's lastCompleted field
       await updateWorkout(workout._id, { lastCompleted: new Date().toISOString() });
       navigate('/workouts');
     } catch (error) {
       console.error('Error saving workout log:', error);
+      toast({
+        title: 'Error saving workout log',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -182,30 +228,46 @@ function Logging() {
                             />
                           </Flex>
                           <HStack spacing={4}>
-                            <FormControl flex="1">
-                              <FormLabel fontSize="sm" color={mutedTextColor}>Reps</FormLabel>
+                            <FormControl flex="1" isInvalid={formErrors[`${exercise.id}-${setIndex}-reps`]}>
+                              <FormLabel fontSize="sm" color={mutedTextColor}>Reps <Text as="span" color="red.500">*</Text></FormLabel>
                               <Input
                                 type="number"
                                 value={set.reps}
-                                onChange={(e) => handleInputChange(exercise.id, setIndex, 'reps', e.target.value)}
+                                onChange={(e) => {
+                                  handleInputChange(exercise.id, setIndex, 'reps', e.target.value);
+                                  setFormErrors(prev => ({ ...prev, [`${exercise.id}-${setIndex}-reps`]: false }));
+                                }}
                                 placeholder="Enter reps"
-                                min="0"
+                                min="1"
                                 bg={inputBg}
                                 borderColor={inputBorderColor}
                               />
+                              {formErrors[`${exercise.id}-${setIndex}-reps`] && (
+                                <Text color="red.500" fontSize="sm" mt={1}>
+                                  Please enter a valid number of reps
+                                </Text>
+                              )}
                             </FormControl>
-                            <FormControl flex="1">
-                              <FormLabel fontSize="sm" color={mutedTextColor}>Weight (kg)</FormLabel>
+                            <FormControl flex="1" isInvalid={formErrors[`${exercise.id}-${setIndex}-weight`]}>
+                              <FormLabel fontSize="sm" color={mutedTextColor}>Weight (kg) <Text as="span" color="red.500">*</Text></FormLabel>
                               <Input
                                 type="number"
                                 value={set.weight}
-                                onChange={(e) => handleInputChange(exercise.id, setIndex, 'weight', e.target.value)}
+                                onChange={(e) => {
+                                  handleInputChange(exercise.id, setIndex, 'weight', e.target.value);
+                                  setFormErrors(prev => ({ ...prev, [`${exercise.id}-${setIndex}-weight`]: false }));
+                                }}
                                 placeholder="Enter weight"
                                 min="0"
                                 step="0.5"
                                 bg={inputBg}
                                 borderColor={inputBorderColor}
                               />
+                              {formErrors[`${exercise.id}-${setIndex}-weight`] && (
+                                <Text color="red.500" fontSize="sm" mt={1}>
+                                  Please enter a valid weight
+                                </Text>
+                              )}
                             </FormControl>
                           </HStack>
                         </Box>
