@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
-import { getSchedules, createSchedule, updateScheduleStatus, deleteSchedule, getWorkouts, getUserProfile } from './services/api';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay } from 'date-fns';
+import { getSchedules, createSchedule, updateScheduleStatus, deleteSchedule, getWorkouts, getUserProfile, getWorkoutLogs } from './services/api';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, isPast, startOfDay, endOfDay, isAfter } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dumbbell, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
@@ -98,6 +98,9 @@ const Schedule = () => {
   };
 
   const handleDateClick = (date) => {
+    if (isPast(startOfDay(date)) && !isToday(date)) {
+      return;
+    }
     setSelectedDate(date);
     onOpen();
   };
@@ -156,6 +159,68 @@ const Schedule = () => {
       navigate('/signin');
     } catch (error) {
       console.error('Error signing out:', error);
+    }
+  };
+
+  // Add new function to check and update missed workouts
+  const checkMissedWorkouts = async () => {
+    const now = new Date();
+    const missedSchedules = schedules.filter(schedule => {
+      const scheduleDate = new Date(schedule.scheduledDate);
+      return (
+        schedule.status === 'scheduled' && 
+        isPast(endOfDay(scheduleDate)) && 
+        !isSameDay(scheduleDate, now)
+      );
+    });
+
+    // Update each missed schedule
+    for (const schedule of missedSchedules) {
+      try {
+        await handleStatusUpdate(schedule._id, 'missed');
+      } catch (error) {
+        console.error('Error updating missed schedule:', error);
+      }
+    }
+  };
+
+  // Add useEffect for periodic checking of missed workouts
+  useEffect(() => {
+    if (currentUser && currentUser.uid) {
+      // Check immediately when component mounts
+      checkMissedWorkouts();
+
+      // Set up interval to check every minute
+      const intervalId = setInterval(checkMissedWorkouts, 60000);
+
+      // Cleanup interval on component unmount
+      return () => clearInterval(intervalId);
+    }
+  }, [currentUser, schedules]);
+
+  const handleCompleteClick = async (schedule) => {
+    try {
+      // Get the workout details
+      const workout = workouts.find(w => w._id === schedule.workoutId);
+      if (!workout) return;
+
+      // Get logs for today
+      const today = new Date();
+      const logs = await getWorkoutLogs(currentUser.uid);
+      const todayLogs = logs.filter(log => 
+        log.workoutId === schedule.workoutId && 
+        isSameDay(new Date(log.completedAt), today)
+      );
+
+      if (todayLogs.length === 0) {
+        // No logs found, redirect to logging page
+        navigate('/logging', { state: { workout } });
+      } else {
+        // Logs exist, mark as completed
+        await handleStatusUpdate(schedule._id, 'completed');
+      }
+    } catch (error) {
+      console.error('Error handling complete click:', error);
     }
   };
 
@@ -236,6 +301,8 @@ const Schedule = () => {
             {days.map(day => {
               const daySchedules = getSchedulesForDate(day);
               const isCurrentDay = isToday(day);
+              const isPastDate = isPast(startOfDay(day)) && !isToday(day);
+              
               return (
                 <GridItem
                   key={day.toString()}
@@ -243,65 +310,56 @@ const Schedule = () => {
                   minH="140px"
                   p={3}
                   position="relative"
-                  cursor="pointer"
+                  cursor={isPastDate ? "not-allowed" : "pointer"}
                   onClick={() => handleDateClick(day)}
-                  _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
+                  _hover={{ 
+                    bg: isPastDate 
+                      ? useColorModeValue('gray.100', 'gray.700') 
+                      : useColorModeValue('gray.50', 'gray.700') 
+                  }}
                   border="1px solid"
                   borderColor={borderColor}
-                  opacity={!isSameMonth(day, currentDate) ? 0.5 : 1}
+                  opacity={isPastDate ? 0.6 : 1}
                 >
-                  <Badge
-                    position="absolute"
-                    top={2}
-                    right={2}
-                    colorScheme={isCurrentDay ? 'blue' : 'gray'}
-                    variant={isCurrentDay ? 'solid' : 'subtle'}
+                  <Text
+                    color={isPastDate ? "gray.400" : "inherit"}
+                    fontWeight={isCurrentDay ? "bold" : "normal"}
                   >
                     {format(day, 'd')}
-                  </Badge>
-                  <VStack spacing={2} mt={8}>
-                    {daySchedules.map(schedule => (
-                      <Card
-                        key={schedule._id}
-                        w="full"
-                        size="sm"
-                        bg={schedule.status === 'completed' ? completedBg : scheduledBg}
-                        border="1px solid"
-                        borderColor={borderColor}
-                      >
-                        <CardBody p={2}>
-                          <Text fontSize="sm" fontWeight="medium">
-                            {schedule.workoutName}
-                          </Text>
-                          <HStack mt={2} spacing={2}>
-                            {schedule.status === 'scheduled' && (
-                              <Button
-                                size="xs"
-                                colorScheme="green"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleStatusUpdate(schedule._id, 'completed');
-                                }}
-                              >
-                                Complete
-                              </Button>
-                            )}
-                            <Button
-                              size="xs"
-                              colorScheme="red"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteSchedule(schedule._id);
-                              }}
-                            >
-                              Delete
-                            </Button>
-                          </HStack>
-                        </CardBody>
-                      </Card>
-                    ))}
-                  </VStack>
+                  </Text>
+                  
+                  {daySchedules.map(schedule => (
+                    <Box
+                      key={schedule._id}
+                      mt={2}
+                      p={1}
+                      borderRadius="md"
+                      bg={
+                        schedule.status === 'completed' 
+                          ? completedBg 
+                          : schedule.status === 'missed'
+                            ? useColorModeValue('red.50', 'red.900')
+                            : scheduledBg
+                      }
+                      fontSize="sm"
+                    >
+                      <HStack justify="space-between" align="center">
+                        <Text noOfLines={1}>{schedule.workoutName}</Text>
+                        {schedule.status === 'scheduled' && isToday(new Date(schedule.scheduledDate)) && (
+                          <Button
+                            size="xs"
+                            colorScheme="green"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCompleteClick(schedule);
+                            }}
+                          >
+                            Complete
+                          </Button>
+                        )}
+                      </HStack>
+                    </Box>
+                  ))}
                 </GridItem>
               );
             })}
