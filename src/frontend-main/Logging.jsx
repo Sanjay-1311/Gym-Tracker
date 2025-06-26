@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Clock, Calendar, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Clock, Calendar, ArrowLeft, Plus, Trash2, Edit } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { createWorkoutLog, updateWorkout } from './services/api';
+import { exerciseNames } from './data/exerciseNames';
 import {
   Box,
   Button,
@@ -21,6 +22,14 @@ import {
   useColorModeValue,
   Text,
   useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Select,
 } from '@chakra-ui/react';
 
 function Logging() {
@@ -31,6 +40,8 @@ function Logging() {
   const [exerciseLogs, setExerciseLogs] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [newExercise, setNewExercise] = useState('');
 
   const bgColor = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'white');
@@ -45,15 +56,11 @@ function Logging() {
       navigate('/workouts');
       return;
     }
-
-    // Initialize exercise logs with the workout's exercises
+    // Initialize with exercises but no pre-filled sets
     setExerciseLogs(
       workout.exercises.map(exercise => ({
         ...exercise,
-        sets: Array(parseInt(exercise.sets)).fill().map(() => ({
-          reps: '',
-          weight: ''
-        }))
+        sets: [], // Start with zero sets
       }))
     );
   }, [workout, navigate]);
@@ -61,25 +68,25 @@ function Logging() {
   const handleInputChange = (exerciseId, setIndex, field, value) => {
     setExerciseLogs(prevLogs =>
       prevLogs.map(log =>
-        log.id === exerciseId
+        (log._id || log.id) === exerciseId
           ? {
               ...log,
               sets: log.sets.map((set, idx) =>
                 idx === setIndex ? { ...set, [field]: value } : set
-              )
+              ),
             }
           : log
       )
     );
   };
 
-  const handleDeleteSet = (exerciseId, setIndex) => {
+  const handleRemoveSet = (exerciseId, setIndex) => {
     setExerciseLogs(prevLogs =>
       prevLogs.map(log =>
-        log.id === exerciseId
+        (log._id || log.id) === exerciseId
           ? {
               ...log,
-              sets: log.sets.filter((_, idx) => idx !== setIndex)
+              sets: log.sets.filter((_, idx) => idx !== setIndex),
             }
           : log
       )
@@ -89,14 +96,35 @@ function Logging() {
   const handleAddSet = (exerciseId) => {
     setExerciseLogs(prevLogs =>
       prevLogs.map(log =>
-        log.id === exerciseId
+        (log._id || log.id) === exerciseId
           ? {
               ...log,
-              sets: [...log.sets, { reps: '', weight: '' }]
+              sets: [...log.sets, { reps: '', weight: '' }],
             }
           : log
       )
     );
+  };
+  
+  const handleAddExerciseToLog = () => {
+    if (!newExercise) return;
+    const exerciseDetails = exerciseNames.find(ex => ex === newExercise);
+    if (!exerciseDetails) return;
+
+    setExerciseLogs(prev => [
+        ...prev,
+        {
+            id: `new-${Date.now()}`,
+            name: exerciseDetails,
+            sets: [],
+        },
+    ]);
+    setNewExercise('');
+    onClose();
+  };
+
+  const handleRemoveExerciseFromLog = (exerciseId) => {
+    setExerciseLogs(prev => prev.filter(ex => (ex._id || ex.id) !== exerciseId));
   };
 
   const validateForm = () => {
@@ -105,7 +133,7 @@ function Logging() {
 
     exerciseLogs.forEach((exercise, exerciseIndex) => {
       exercise.sets.forEach((set, setIndex) => {
-        const setKey = `${exercise.id}-${setIndex}`;
+        const setKey = `${exercise._id || exercise.id}-${setIndex}`;
         
         // Validate reps
         if (!set.reps || isNaN(set.reps) || set.reps <= 0) {
@@ -193,8 +221,16 @@ function Logging() {
           )}
         </HStack>
 
+        <Flex justify="space-between" align="center">
+            <Heading as="h2" size="lg" color={textColor}>
+                Log Your Workout
+            </Heading>
+            <Button leftIcon={<Icon as={Edit} />} onClick={onOpen} colorScheme="teal" variant="outline">
+                Add Exercises
+            </Button>
+        </Flex>
+
         <Box>
-          <Heading as="h2" size="lg" mb={4} color={textColor}>Log Your Sets</Heading>
           <VStack spacing={4} align="stretch">
             {exerciseLogs.map((exercise) => (
               <Card key={exercise._id || exercise.id} bg={cardBg} borderColor={borderColor} borderWidth="1px">
@@ -205,11 +241,12 @@ function Logging() {
                       <HStack spacing={2}>
                         <Text fontSize="sm" color={mutedTextColor}>{exercise.sets.length} sets</Text>
                         <IconButton 
-                          icon={<Icon as={Plus} size={16} />}
-                          onClick={() => handleAddSet(exercise.id)}
+                          icon={<Icon as={Trash2} size={16} />}
+                          onClick={() => handleRemoveExerciseFromLog(exercise._id || exercise.id)}
                           size="sm"
-                          colorScheme="green"
-                          aria-label="Add Set"
+                          colorScheme="red"
+                          variant="ghost"
+                          aria-label="Delete Exercise"
                         />
                       </HStack>
                     </Flex>
@@ -220,7 +257,7 @@ function Logging() {
                             <Text fontWeight="bold" color={textColor}>Set {setIndex + 1}</Text>
                             <IconButton 
                               icon={<Icon as={Trash2} size={16} />}
-                              onClick={() => handleDeleteSet(exercise.id, setIndex)}
+                              onClick={() => handleRemoveSet(exercise._id || exercise.id, setIndex)}
                               size="sm"
                               colorScheme="red"
                               variant="ghost"
@@ -228,34 +265,34 @@ function Logging() {
                             />
                           </Flex>
                           <HStack spacing={4}>
-                            <FormControl flex="1" isInvalid={formErrors[`${exercise.id}-${setIndex}-reps`]}>
+                            <FormControl flex="1" isInvalid={formErrors[`${exercise._id || exercise.id}-${setIndex}-reps`]}>
                               <FormLabel fontSize="sm" color={mutedTextColor}>Reps <Text as="span" color="red.500">*</Text></FormLabel>
                               <Input
                                 type="number"
                                 value={set.reps}
                                 onChange={(e) => {
-                                  handleInputChange(exercise.id, setIndex, 'reps', e.target.value);
-                                  setFormErrors(prev => ({ ...prev, [`${exercise.id}-${setIndex}-reps`]: false }));
+                                  handleInputChange(exercise._id || exercise.id, setIndex, 'reps', e.target.value);
+                                  setFormErrors(prev => ({ ...prev, [`${exercise._id || exercise.id}-${setIndex}-reps`]: false }));
                                 }}
                                 placeholder="Enter reps"
                                 min="1"
                                 bg={inputBg}
                                 borderColor={inputBorderColor}
                               />
-                              {formErrors[`${exercise.id}-${setIndex}-reps`] && (
+                              {formErrors[`${exercise._id || exercise.id}-${setIndex}-reps`] && (
                                 <Text color="red.500" fontSize="sm" mt={1}>
                                   Please enter a valid number of reps
                                 </Text>
                               )}
                             </FormControl>
-                            <FormControl flex="1" isInvalid={formErrors[`${exercise.id}-${setIndex}-weight`]}>
+                            <FormControl flex="1" isInvalid={formErrors[`${exercise._id || exercise.id}-${setIndex}-weight`]}>
                               <FormLabel fontSize="sm" color={mutedTextColor}>Weight (kg) <Text as="span" color="red.500">*</Text></FormLabel>
                               <Input
                                 type="number"
                                 value={set.weight}
                                 onChange={(e) => {
-                                  handleInputChange(exercise.id, setIndex, 'weight', e.target.value);
-                                  setFormErrors(prev => ({ ...prev, [`${exercise.id}-${setIndex}-weight`]: false }));
+                                  handleInputChange(exercise._id || exercise.id, setIndex, 'weight', e.target.value);
+                                  setFormErrors(prev => ({ ...prev, [`${exercise._id || exercise.id}-${setIndex}-weight`]: false }));
                                 }}
                                 placeholder="Enter weight"
                                 min="0"
@@ -263,7 +300,7 @@ function Logging() {
                                 bg={inputBg}
                                 borderColor={inputBorderColor}
                               />
-                              {formErrors[`${exercise.id}-${setIndex}-weight`] && (
+                              {formErrors[`${exercise._id || exercise.id}-${setIndex}-weight`] && (
                                 <Text color="red.500" fontSize="sm" mt={1}>
                                   Please enter a valid weight
                                 </Text>
@@ -273,6 +310,9 @@ function Logging() {
                         </Box>
                       ))}
                     </VStack>
+                    <Button onClick={() => handleAddSet(exercise._id || exercise.id)} leftIcon={<Plus />} colorScheme="gray" size="sm" mt={4}>
+                      Add Set
+                    </Button>
                   </VStack>
                 </CardBody>
               </Card>
@@ -284,6 +324,33 @@ function Logging() {
           Save Workout Log
         </Button>
       </VStack>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent bg={bgColor}>
+          <ModalHeader>Add Exercise to Log</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl>
+                <FormLabel>Select Exercise</FormLabel>
+                <Select
+                  placeholder="Choose an exercise"
+                  value={newExercise}
+                  onChange={(e) => setNewExercise(e.target.value)}
+                >
+                  {exerciseNames.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button colorScheme="teal" onClick={handleAddExerciseToLog} isDisabled={!newExercise}>
+                Add Exercise
+              </Button>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 }
