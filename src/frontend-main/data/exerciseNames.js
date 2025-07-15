@@ -61,6 +61,19 @@ export const exerciseNames = [
   "cable lateral raises",
   "lat prayer",
   "face pulls",
-  
-  "Tricep kickbacks"
+  "Smith machine squats",
+  "Smith machine bench press",
+  "Smith machine overhead press",
+  "Smith machine pullups",
+  "Smith machine rows",
+  "Smith machine shrugs",
+  "Smith machine tricep extensions",
+  "Smith machine tricep pushdowns",
+  "Smith machine tricep pushdowns",
+
+
+  "Tricep kickbacks",
+  "Tricep pushdowns",
+  "Tricep extensions",
+  "Tricep pushdowns",
 ]; 
