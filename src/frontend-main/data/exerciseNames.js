@@ -70,10 +70,6 @@ export const exerciseNames = [
   "Smith machine tricep extensions",
   "Smith machine tricep pushdowns",
   "Smith machine tricep pushdowns",
-
-
   "Tricep kickbacks",
-  "Tricep pushdowns",
-  "Tricep extensions",
   "Tricep pushdowns",
 ]; 
