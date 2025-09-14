@@ -165,3 +165,25 @@ export const deleteSchedule = async (scheduleId) => {
   if (!response.ok) throw new Error('Failed to delete schedule');
   return response.json();
 };
+// Chatbot API call
+export const askChatbot = async (query) => {
+  // The data payload must be an object with a "query" key
+  const requestData = { query };
+
+  const response = await fetch(`http://127.0.0.1:5001/ask`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestData),
+  });
+
+  if (!response.ok) {
+    // Handle HTTP errors
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Something went wrong');
+  }
+
+  // Parse the JSON response and return it
+  return response.json();
+};

@@ -7,7 +7,7 @@ import workoutLogRoutes from './routes/workoutLogs.js';
 import userRoutes from './routes/users.js';
 import scheduleRoutes from './routes/schedules.js';
 import path from 'path';
-
+import chatRoutes from './routes/chatRoutes.js';
 dotenv.config();
 
 // Connect to MongoDB
@@ -24,6 +24,7 @@ app.use('/api/workouts', workoutRoutes);
 app.use('/api/workout-logs', workoutLogRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Test database connection
 app.get('/api/test', async (req, res) => {

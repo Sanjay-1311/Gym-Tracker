@@ -9,7 +9,7 @@ import RecentWorkouts from "./RecentWorkouts";
 import MotivationalQuote from "./MotivationalQuote";
 import { Box, Container, Flex } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-
+import ChatbotOverlay from "./ChatbotOverlay";
 function Dashboard() {
   return (
     <>
@@ -33,6 +33,7 @@ function Dashboard() {
         </Flex>
         <RecentWorkouts />
       </Box>
+      <ChatbotOverlay />
     </>
   );
 }
