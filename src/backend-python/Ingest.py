@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer
 
 # 1. Initialize a persistent ChromaDB client
 print("Initializing persistent ChromaDB client...")
-client = chromadb.PersistentClient(path="./chroma_db")
+client = chromadb.PersistentClient(path="/var/data/chroma_db")
 
 # 2. Get or create the collection
 collection = client.get_or_create_collection("fitness_faq")

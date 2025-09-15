@@ -7,7 +7,7 @@ def test_chatbot():
     Test script to send requests to the Flask chatbot app and display results
     """
     # Base URL for the Flask app
-    base_url = "http://localhost:5000"
+    base_url = "http://localhost:5001"
     
     # Test questions
     test_questions = [

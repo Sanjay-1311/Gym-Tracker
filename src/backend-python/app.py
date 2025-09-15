@@ -28,7 +28,7 @@ embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # 3. Connect to ChromaDB
 print("Connecting to ChromaDB...")
-client = chromadb.PersistentClient(path="./chroma_db")
+client = chromadb.PersistentClient(path="/var/data/chroma_db")
 try:
     collection = client.get_collection("fitness_faq")
     print("✅ Found existing fitness_faq collection")
@@ -62,7 +62,7 @@ def generate_response(user_query):
     query_embedding = embedding_model.encode([user_query])
     results = collection.query(
         query_embeddings=query_embedding.tolist(),
-        n_results=1
+        n_results=3
     )
     
     if not results['documents'][0]:
@@ -134,4 +134,4 @@ def handle_ask():
 
 if __name__ == '__main__':
     print("Starting Flask server...")
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=False)
